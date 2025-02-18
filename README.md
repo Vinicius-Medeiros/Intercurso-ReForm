@@ -14,4 +14,5 @@ outros repositórios do projeto
  
 ----
 ## Contribuidores
-<img src="https://github.com/phln1108.png" width="60px;" tyle="width:100px; height:100px; border-radius:50%;" />
+
+<a href="https://github.com/phln1108"><img src="https://github.com/phln1108.png" style="width:60px; height:60px; border-radius:50%;"></a>

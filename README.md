@@ -19,3 +19,5 @@ outros repositórios do projeto
 <a href="https://github.com/phln1108"><img src="https://github.com/phln1108.png" style="width:60px; height:60px; border-radius:50%;"></a>
 <a href="https://github.com/beatriizsilva"><img src="https://github.com/beatriizsilva.png" style="width:60px; height:60px; border-radius:50%;"></a>
 <a href="https://github.com/Vinicius-Medeiros"><img src="https://github.com/Vinicius-Medeiros.png" style="width:60px; height:60px; border-radius:50%;"></a>
+<a href="https://github.com/mikhaelmourao"><img src="https://github.com/mikhaelmourao.png" style="width:60px; height:60px; border-radius:50%;"></a>
+<a href="https://github.com/JoaooHolanda"><img src="https://github.com/JoaooHolanda.png" style="width:60px; height:60px; border-radius:50%;"></a>

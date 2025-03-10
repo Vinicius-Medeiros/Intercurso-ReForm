@@ -1,6 +1,7 @@
 # Projeto de intercurso
 ## Sistema facilitador de troca de recursos reciclaveis
-Sistema para facilitar um 
+Um sitema para facilitar a troca de insumos reciclaveis entre empresa, com o objetivo de auxiliar e facilitar o mercado sustentável.
+ 
 
 
 

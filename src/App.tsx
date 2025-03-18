@@ -13,18 +13,18 @@ function App() {
         <button
           onClick={() => closeSnackbar(key)}
           style={{
-            height: '100%',
-            left: 0,
             position: 'absolute',
+            height: '100%',
+            width: '100%',
+            left: 0,
             top: 0,
-            width: '100%'
+            background: "transparent",
           }}
         />
       )}
-      style={{ fontFamily: 'Roboto', fontSize: "var(--size-m)" }}
+      style={{ fontFamily: 'Roboto'}}
     >
       <Router />
-      {/* <InputAdornments /> */}
     </SnackbarProvider>
   )
 }

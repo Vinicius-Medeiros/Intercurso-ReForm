@@ -168,7 +168,7 @@ export const LoginPage = () => {
                 component={'form'}
                 onSubmit={handleRecoverPassword}
             >
-                <DialogTitle>Reset password</DialogTitle>
+                <DialogTitle>Recuperação de Senha</DialogTitle>
                 <DialogContent
                     sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}
                 >
@@ -187,9 +187,9 @@ export const LoginPage = () => {
                     />
                 </DialogContent>
                 <DialogActions sx={{ pb: 3, px: 3 }}>
-                    <Button onClick={() => setModalOpen(false)}>Cancel</Button>
+                    <Button onClick={() => setModalOpen(false)}>Cancelar</Button>
                     <Button variant="contained" type="submit">
-                        Continue
+                        Enviar
                     </Button>
                 </DialogActions>
             </Dialog>

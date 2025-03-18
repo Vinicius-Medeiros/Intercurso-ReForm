@@ -141,6 +141,7 @@ export const LoginPage = () => {
                         sx={{
                             alignSelf: "flex-end",
                             marginTop: -1.5,
+                            cursor: "pointer"
                         }}
 
                     >

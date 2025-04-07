@@ -25,7 +25,7 @@ export const RegisterPage = () => {
         }
 
         setCnpjState(CnpjState.Loading)
-        verifyCnpj(cnpj).then( res => {
+        verifyCnpj(cnpj).then(res => {
             console.log(res.data)
             setCnpjState(CnpjState.Success)
         }).catch(res => {
@@ -34,7 +34,7 @@ export const RegisterPage = () => {
         })
 
 
-    },[cnpj])
+    }, [cnpj])
 
     var cnpjStateIcon: ReactElement
     switch (cnpjState) {
@@ -57,99 +57,79 @@ export const RegisterPage = () => {
     }
 
     return (
-        <Box
+
+        <><Typography variant="h4" component={"h1"}>Crie uma conta</Typography><Box
+            component={"form"}
+            noValidate
+            onSubmit={handleSubmit}
+            width={"100%"}
             display={"flex"}
             flexDirection={"column"}
-            minHeight={400}
-            borderRadius={2}
-            alignItems={"center"}
-            margin={"auto"}
-            marginTop={16}
-            justifySelf={"center"}
-            gap={4}
-            padding={3}
-            sx={{
-                width: 800,
-                background: "rgba(255,255,255,0.9)",
-                boxShadow: "4px 4px 4px rgba(100, 100, 100, 0.1)"
-
-            }}
+            gap={2}
         >
-            <Typography variant="h4" component={"h1"} >Crie uma conta</Typography>
+            <TextField
+                // inputRef={PassInputRef}
+                id="pass"
+                label="CNPJ"
+                variant="outlined"
+                type="text"
+                value={cnpj}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setCnpj(e.target.value)}
+                slotProps={{
+                    input: {
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                {/* <Icon
+                                aria-label="toggle password visibility"
+                                onClick={() => setShowPassword(current => !current)}
+                                onMouseDown={(e: MouseEvent) => e.preventDefault()}
+                            >
+                                {<VisibilityOff />}
+                            </Icon> */}
+                                {cnpjStateIcon}
+
+                            </InputAdornment>
+                        ),
+                    },
+                }}
+                required />
             <Box
-                component={"form"}
-                noValidate
-                onSubmit={handleSubmit}
-                width={"100%"}
                 display={"flex"}
-                flexDirection={"column"}
-                gap={2}
+                flexDirection={"row"}
+                justifyContent={"space-between"}
+                width={"100%"}
             >
-                <TextField
-                    // inputRef={PassInputRef}
-                    id="pass"
-                    label="CNPJ"
-                    variant="outlined"
-                    type="text"
-                    value={cnpj}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCnpj(e.target.value)}
-                    slotProps={{
-                        input: {
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    {/* <Icon
-                                            aria-label="toggle password visibility"
-                                            onClick={() => setShowPassword(current => !current)}
-                                            onMouseDown={(e: MouseEvent) => e.preventDefault()}
-                                        >
-                                            {<VisibilityOff />}
-                                        </Icon> */}
-                                    {cnpjStateIcon}
-
-                                </InputAdornment>
-                            ),
-                        },
-                    }}
-                    required
-                />
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
-                    width={"100%"}
-                >
-                    <TextField />
-                    <TextField />
-                </Box>
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
-                    width={"100%"}
-                >
-                    <TextField />
-                    <TextField />
-                </Box>
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
-                    width={"100%"}
-                >
-                    <TextField />
-                    <TextField />
-                </Box>
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
-                    width={"100%"}
-                >
-                    <TextField />
-                    <TextField />
-                </Box>
+                <TextField />
+                <TextField />
             </Box>
+            <Box
+                display={"flex"}
+                flexDirection={"row"}
+                justifyContent={"space-between"}
+                width={"100%"}
+            >
+                <TextField />
+                <TextField />
+            </Box>
+            <Box
+                display={"flex"}
+                flexDirection={"row"}
+                justifyContent={"space-between"}
+                width={"100%"}
+            >
+                <TextField />
+                <TextField />
+            </Box>
+            <Box
+                display={"flex"}
+                flexDirection={"row"}
+                justifyContent={"space-between"}
+                width={"100%"}
+            >
+                <TextField />
+                <TextField />
+            </Box>
+        </Box></>
 
-        </Box>
     )
 }

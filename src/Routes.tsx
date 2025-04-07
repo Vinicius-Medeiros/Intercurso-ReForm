@@ -1,13 +1,16 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import { LoginPage } from "./pages/login/login";
 import { RegisterPage } from "./pages/register/Register";
+import { IslandLayout } from "./layout/IslandLayout";
 
 export const Router = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+                <Route element={<IslandLayout />}>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                </Route>
             </Routes>
         </BrowserRouter>
     )

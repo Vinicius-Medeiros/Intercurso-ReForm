@@ -12,7 +12,7 @@ const theme = createTheme({
             main: "#1B5E20",
         },
         text: {
-
+            primary: "#1E1E1E",
         },
         info: {
             main: "#0F3311",
@@ -28,7 +28,7 @@ const theme = createTheme({
                 root: {
                     boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
                 }
-                
+
             }
         },
         MuiButton: {

@@ -39,14 +39,7 @@ export const LoginPage = () => {
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
-        enqueueSnackbar("Logado com sucesso!", {
-            variant: "success",
-            anchorOrigin: {
-                horizontal: "center",
-                vertical: "top",
-            },
-            autoHideDuration: 3000
-        })
+        enqueueSnackbar("Logado com sucesso!", {variant: "success",})
         setLogin("")
         setPassword("")
     }
@@ -54,14 +47,7 @@ export const LoginPage = () => {
     const handleRecoverPassword = (event: FormEvent<HTMLDivElement>) => {
         event.preventDefault();
 
-        enqueueSnackbar("Email de recuperação enviado com sucesso!", {
-            variant: "success",
-            anchorOrigin: {
-                horizontal: "center",
-                vertical: "top",
-            },
-            autoHideDuration: 3000
-        })
+        enqueueSnackbar("Email de recuperação enviado com sucesso!", {variant: "success",})
 
         setModalOpen(false);
         setEmail("")

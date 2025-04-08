@@ -1,5 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 
+//cnpj testes 
+//fortaleza - 07954605000160
+//meu cnpj  - 55319695000160
+
 export type CnpjRequest = {
     status: "OK" | "ERROR",
     situacao: string,

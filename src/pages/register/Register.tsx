@@ -3,7 +3,8 @@ import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { Box, CircularProgress, InputAdornment, TextField, Typography } from "@mui/material"
 import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react"
-import { verifyCnpj } from '../../services/receitaWS';
+import { verifyCnpj } from '../../Services/receitaWS';
+import { useSnackbar } from 'notistack';
 
 
 enum CnpjState {
@@ -14,6 +15,9 @@ enum CnpjState {
 }
 
 export const RegisterPage = () => {
+    const {
+        enqueueSnackbar
+    } = useSnackbar()
 
     const [cnpjState, setCnpjState] = useState<CnpjState>(CnpjState.None)
     const [cnpj, setCnpj] = useState<string>("")
@@ -27,10 +31,39 @@ export const RegisterPage = () => {
         setCnpjState(CnpjState.Loading)
         verifyCnpj(cnpj).then(res => {
             console.log(res.data)
-            setCnpjState(CnpjState.Success)
+            if (res.data.status == "OK") {
+                setCnpjState(CnpjState.Success)
+                enqueueSnackbar("CNPJ validado com sucesso!", {
+                    variant: "success",
+                    anchorOrigin: {
+                        horizontal: "center",
+                        vertical: "top",
+                    },
+                    autoHideDuration: 3000
+                })
+            } else {
+                setCnpjState(CnpjState.NotFound)
+                enqueueSnackbar(res.data.message, {
+                    variant: "error",
+                    anchorOrigin: {
+                        horizontal: "center",
+                        vertical: "top",
+                    },
+                    autoHideDuration: 3000
+                })
+
+            }
         }).catch(res => {
             console.log(res)
             setCnpjState(CnpjState.NotFound)
+            enqueueSnackbar("Serviço ocupado, tente novamente mais tarde!", {
+                variant: "warning",
+                anchorOrigin: {
+                    horizontal: "center",
+                    vertical: "top",
+                },
+                autoHideDuration: 3000
+            })
         })
 
 

@@ -1,7 +1,7 @@
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { Box, CircularProgress, InputAdornment, TextField, Typography } from "@mui/material"
+import { Box, Button, CircularProgress, InputAdornment, styled, TextField, Typography } from "@mui/material"
 import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react"
 import { useSnackbar } from 'notistack';
 import { verifyCnpj } from '../../services/receitaWS';
@@ -14,6 +14,17 @@ enum CnpjState {
     ERROR,
 }
 
+const Row = styled(Box)(({ }) => ({
+    display: "flex",
+    width: "100%",
+    // background: "red",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+    flexWrap: "wrap",
+    
+}))
+
 export const RegisterPage = () => {
     const {
         enqueueSnackbar
@@ -21,6 +32,11 @@ export const RegisterPage = () => {
 
     const [cnpjState, setCnpjState] = useState<CnpjState>(CnpjState.None)
     const [cnpj, setCnpj] = useState<string>("")
+    const [name, setName] = useState<string>("")
+    const [email, setEmail] = useState<string>("")
+    const [pass, setPass] = useState<string>("")
+    const [pass2, setpass2] = useState<string>("")
+
 
     useEffect(() => {
         if (cnpj.length < 14) {
@@ -28,7 +44,11 @@ export const RegisterPage = () => {
             return;
         }
 
-        setCnpjState(CnpjState.Loading)
+        if (cnpj.length > 14)
+            return;
+
+
+            setCnpjState(CnpjState.Loading)
         verifyCnpj(cnpj).then(res => {
             console.log(res.data)
             if (res.data.status != "OK") {
@@ -40,8 +60,17 @@ export const RegisterPage = () => {
                 enqueueSnackbar("CNPJ em situação de BAIXA, insira um CNPJ ainda em ATIVIDADE!", { variant: "warning", })
                 return;
             }
+            //sucesso
             setCnpjState(CnpjState.Success)
             enqueueSnackbar("CNPJ validado com sucesso!", { variant: "success", })
+            if(res.data.fantasia)
+                setName(res.data.fantasia);
+            
+            else if (res.data.nome)
+                setName(res.data.nome);
+            
+            if (res.data.email)
+                setEmail(res.data.email);
 
 
         }).catch(res => {
@@ -74,19 +103,21 @@ export const RegisterPage = () => {
     return (
         <>
             <Typography variant="h4" component={"h1"} color="primary">
-                Login
+                Cadastre-se
             </Typography>
             <Box
                 component={"form"}
                 noValidate
                 onSubmit={handleSubmit}
-                width={"100%"}
+                width={"20rem"}
                 display={"flex"}
                 flexDirection={"column"}
+                alignItems={"center"}
                 gap={2}
             >
                 <TextField
                     // inputRef={PassInputRef}
+                    disabled={cnpjState == CnpjState.Loading}
                     id="cnpj"
                     label="CNPJ"
                     variant="outlined"
@@ -94,6 +125,9 @@ export const RegisterPage = () => {
                     value={cnpj}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setCnpj(e.target.value)}
                     slotProps={{
+                        htmlInput: {
+                            maxLength: 14,
+                        },
                         input: {
                             endAdornment: (
                                 <InputAdornment position="end">
@@ -102,46 +136,70 @@ export const RegisterPage = () => {
                             ),
                         },
                     }}
+                    sx={{
+                        width: "100%",
+                    }}
                     required
                 />
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
-                    width={"100%"}
-                >
-                    <TextField 
-                        
-                    />
-                    <TextField />
-                </Box>
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
-                    width={"100%"}
-                >
-                    <TextField />
-                    <TextField />
-                </Box>
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
-                    width={"100%"}
-                >
-                    <TextField />
-                    <TextField />
-                </Box>
-                <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
-                    width={"100%"}
-                >
-                    <TextField />
-                    <TextField />
-                </Box>
+                <TextField
+                    id="nome"
+                    label="Nome"
+                    variant="outlined"
+                    value={name}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                    sx={{
+                        width: "100%"
+                    }}
+                    required
+                />
+                <TextField
+                    id="email"
+                    label="Email"
+                    variant="outlined"
+                    type="email"
+                    value={email}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="pass"
+                    label="Senha"
+                    variant="outlined"
+                    type='password'
+                    value={pass}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setPass(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="confirmPass"
+                    label="Confimar Senha"
+                    variant="outlined"
+                    type='password'
+                    value={pass2}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setpass2(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <Row>
+                    <Button 
+                    variant="contained" 
+                    type="submit" 
+                    color="success"
+                    sx={{
+                        width: "10rem",
+                    }}
+                    >
+                        Criar
+                    </Button>
+                </Row>
             </Box></>
 
     )

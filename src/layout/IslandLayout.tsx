@@ -23,7 +23,7 @@ export const IslandLayout = () => (
                 flexDirection: "column",
                 // maxWidth: 400,
                 minHeight: 400,
-                borderRadius: 2,
+                borderRadius: 4,
                 alignItems: "center",
                 // margin: "auto",
                 justifyContent: "center",

@@ -35,7 +35,8 @@ const theme = createTheme({
             styleOverrides: {
                 contained: {
                     fontWeight: 'bold',
-                    textTransform: 'none'
+                    textTransform: 'none',
+                    borderRadius: 8,
                 }
             }
         }

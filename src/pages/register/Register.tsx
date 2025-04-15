@@ -3,8 +3,9 @@ import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { Box, Button, CircularProgress, InputAdornment, styled, TextField, Typography } from "@mui/material"
 import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react"
-import { useSnackbar } from 'notistack';
-import { verifyCnpj } from '../../services/receitaWS';
+import { OptionsObject, useSnackbar } from 'notistack';
+import { CnpjRequest, verifyCnpj } from '../../Services/receitaWS';
+import { closeIconStyles } from './constant';
 
 
 enum CnpjState {
@@ -12,6 +13,25 @@ enum CnpjState {
     Success,
     Loading,
     ERROR,
+}
+
+interface ReturnMsgToShowType {
+    message: String | undefined
+    variant: OptionsObject<"warning" | "error" | "success" | "default" | "info">
+}
+
+const returnMsgToShow = (response: CnpjRequest): ReturnMsgToShowType => {
+    if (response.situacao == "BAIXADA") {
+        return {
+            message: "CNPJ em situação de BAIXA, insira um CNPJ ainda em ATIVIDADE!",
+            variant: { variant: "warning" }
+        }
+    }
+
+    return {
+        message: response.message,
+        variant: { variant: "error" }
+    }
 }
 
 const Row = styled(Box)(({ }) => ({
@@ -22,7 +42,7 @@ const Row = styled(Box)(({ }) => ({
     justifyContent: "center",
     gap: 8,
     flexWrap: "wrap",
-    
+
 }))
 
 export const RegisterPage = () => {
@@ -48,27 +68,25 @@ export const RegisterPage = () => {
             return;
 
 
-            setCnpjState(CnpjState.Loading)
+        setCnpjState(CnpjState.Loading)
         verifyCnpj(cnpj).then(res => {
             console.log(res.data)
-            if (res.data.status != "OK") {
+            if (res.data.status != "OK" || res.data.situacao === "BAIXADA") {
                 setCnpjState(CnpjState.ERROR)
-                enqueueSnackbar(res.data.message, { variant: "error", })
+                const { message, variant } = returnMsgToShow(res.data)
+                enqueueSnackbar(message, variant)
                 return;
             }
-            if (res.data.situacao === "BAIXADA") {
-                enqueueSnackbar("CNPJ em situação de BAIXA, insira um CNPJ ainda em ATIVIDADE!", { variant: "warning", })
-                return;
-            }
+
             //sucesso
             setCnpjState(CnpjState.Success)
             enqueueSnackbar("CNPJ validado com sucesso!", { variant: "success", })
-            if(res.data.fantasia)
+            if (res.data.fantasia)
                 setName(res.data.fantasia);
-            
+
             else if (res.data.nome)
                 setName(res.data.nome);
-            
+
             if (res.data.email)
                 setEmail(res.data.email);
 
@@ -89,12 +107,11 @@ export const RegisterPage = () => {
             cnpjStateIcon = <CheckRoundedIcon />
             break;
         case CnpjState.ERROR:
-            cnpjStateIcon = <CloseRoundedIcon />
+            cnpjStateIcon = <CloseRoundedIcon onClick={() => setCnpj("")} sx={closeIconStyles}/>
             break;
         default:
             cnpjStateIcon = <RemoveRoundedIcon />
     }
-
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -189,13 +206,13 @@ export const RegisterPage = () => {
                     required
                 />
                 <Row>
-                    <Button 
-                    variant="contained" 
-                    type="submit" 
-                    color="success"
-                    sx={{
-                        width: "10rem",
-                    }}
+                    <Button
+                        variant="contained"
+                        type="submit"
+                        color="success"
+                        sx={{
+                            width: "10rem",
+                        }}
                     >
                         Criar
                     </Button>

@@ -4,8 +4,8 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { Box, Button, CircularProgress, InputAdornment, styled, TextField, Typography } from "@mui/material"
 import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react"
 import { OptionsObject, useSnackbar } from 'notistack';
-import { CnpjRequest, verifyCnpj } from '../../Services/receitaWS';
 import { closeIconStyles } from './constant';
+import { verifyCnpj } from '../../services/receitaWS';
 
 
 enum CnpjState {

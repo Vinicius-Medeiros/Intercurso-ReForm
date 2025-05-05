@@ -2,52 +2,69 @@ import { Visibility, VisibilityOff } from "@mui/icons-material"
 import { Box, Button, IconButton, InputAdornment, TextField, Typography, Link, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material"
 import { useSnackbar } from "notistack"
 import { ChangeEvent, FormEvent, MouseEvent, useRef, useState } from "react"
-import { Link as RouterLink } from "react-router"
+import { Link as RouterLink, useNavigate } from "react-router-dom"
+import { useDispatch } from 'react-redux';
+import { login } from '../../store/slices/authSlice';
 
 export const LoginPage = () => {
     const {
         enqueueSnackbar
     } = useSnackbar()
 
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+
     const [modalOpen, setModalOpen] = useState<boolean>(false)
-
     const [email, setEmail] = useState<string>("")
-
     const PassInputRef = useRef<HTMLInputElement>(null)
     const LoginInputRef = useRef<HTMLInputElement>(null)
-
-    const [login, setLogin] = useState<String>("")
+    const [loginValue, setLoginValue] = useState<String>("")
     const [password, setPassword] = useState<String>("")
     const [showPassword, setShowPassword] = useState<boolean>(false)
 
-    const disableButton: boolean = !login || !password
+    const disableButton: boolean = !loginValue || !password
 
     const handleLoginSubmit = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (login && e.key === "Enter" && !password) {
+        if (loginValue && e.key === "Enter" && !password) {
             e.preventDefault()
             PassInputRef.current?.focus()
         }
     }
 
     const handlePassSubmit = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (password && e.key === "Enter" && !login) {
+        if (password && e.key === "Enter" && !loginValue) {
             e.preventDefault()
             LoginInputRef.current?.focus()
         }
     }
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
-        enqueueSnackbar("Logado com sucesso!", {variant: "success",})
-        setLogin("")
-        setPassword("")
+        try {
+            // Here you would typically make an API call to authenticate
+            // For now, we'll simulate a successful login
+            const mockResponse = {
+                user: { login: loginValue },
+                accessToken: 'mock-access-token',
+                refreshToken: 'mock-refresh-token'
+            };
+
+            dispatch(login(mockResponse));
+            
+            enqueueSnackbar("Logado com sucesso!", {variant: "success"})
+            setLoginValue("")
+            setPassword("")
+            navigate("/home")
+        } catch (error) {
+            enqueueSnackbar("Erro ao fazer login!", {variant: "error"})
+        }
     }
 
     const handleRecoverPassword = (event: FormEvent<HTMLDivElement>) => {
         event.preventDefault();
 
-        enqueueSnackbar("Email de recuperação enviado com sucesso!", {variant: "success",})
+        enqueueSnackbar("Email de recuperação enviado com sucesso!", {variant: "success"})
 
         setModalOpen(false);
         setEmail("")
@@ -73,8 +90,8 @@ export const LoginPage = () => {
                     label="Login"
                     variant="outlined"
                     type="text"
-                    value={login}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setLogin(e.target.value)}
+                    value={loginValue}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setLoginValue(e.target.value)}
                     autoFocus
                     required
                     onKeyDown={handleLoginSubmit}

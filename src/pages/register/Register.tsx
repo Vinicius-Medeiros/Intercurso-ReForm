@@ -5,7 +5,8 @@ import { Box, Button, CircularProgress, InputAdornment, styled, TextField, Typog
 import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react"
 import { OptionsObject, useSnackbar } from 'notistack';
 import { closeIconStyles } from './constant';
-import { verifyCnpj } from '../../services/receitaWS';
+import { CnpjRequest, verifyCnpj } from '../../Services/receitaWS';
+import { useNavigate } from 'react-router';
 
 
 enum CnpjState {
@@ -49,6 +50,8 @@ export const RegisterPage = () => {
     const {
         enqueueSnackbar
     } = useSnackbar()
+
+    const navigate = useNavigate()
 
     const [cnpjState, setCnpjState] = useState<CnpjState>(CnpjState.None)
     const [cnpj, setCnpj] = useState<string>("")
@@ -107,7 +110,7 @@ export const RegisterPage = () => {
             cnpjStateIcon = <CheckRoundedIcon />
             break;
         case CnpjState.ERROR:
-            cnpjStateIcon = <CloseRoundedIcon onClick={() => setCnpj("")} sx={closeIconStyles}/>
+            cnpjStateIcon = <CloseRoundedIcon onClick={() => setCnpj("")} sx={closeIconStyles} />
             break;
         default:
             cnpjStateIcon = <RemoveRoundedIcon />
@@ -205,13 +208,24 @@ export const RegisterPage = () => {
                     }}
                     required
                 />
-                <Row>
+                <Row sx={{ display: "flex", flexDirection: "row", gap: 2, width: "100%" }}>
+                    <Button
+                        variant="outlined"
+                        onClick={() => navigate("/login")}
+                        color="success"
+                        sx={{
+                            width: "9.5rem",
+                        }}
+                    >
+                        Voltar
+                    </Button>
+
                     <Button
                         variant="contained"
                         type="submit"
                         color="success"
                         sx={{
-                            width: "10rem",
+                            width: "9.5rem",
                         }}
                     >
                         Criar

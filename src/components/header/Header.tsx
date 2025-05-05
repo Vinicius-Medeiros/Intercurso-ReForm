@@ -2,12 +2,15 @@ import { AccountCircle } from "@mui/icons-material";
 import { AppBar, Box, IconButton, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
 import { useState } from "react";
 import Logo from "../../assets/logo";
-import { useNavigate } from "react-router";
-
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store';
+import { logout } from '../../store/slices/authSlice';
 
 export const Header = () => {
     const navigate = useNavigate();
-    const [auth, setAuth] = useState(false);
+    const dispatch = useDispatch();
+    const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -16,6 +19,11 @@ export const Header = () => {
 
     const handleClose = () => {
         setAnchorEl(null);
+    };
+
+    const handleLogout = () => {
+        dispatch(logout());
+        navigate('/login');
     };
 
     return (
@@ -53,10 +61,10 @@ export const Header = () => {
                             aria-label="account of current user"
                             aria-controls="menu-appbar"
                             aria-haspopup="true"
-                            onClick={() => auth ? handleMenu : navigate("/login")}
+                            onClick={isAuthenticated ? handleMenu : () => navigate("/login")}
                             color="inherit"
                         >
-                            {auth ?
+                            {isAuthenticated ?
                                 <AccountCircle
                                     sx={{
                                         height: 48,
@@ -87,8 +95,9 @@ export const Header = () => {
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                         >
-                            <MenuItem onClick={handleClose}>Profile</MenuItem>
-                            <MenuItem onClick={handleClose}>My account</MenuItem>
+                            <MenuItem onClick={handleClose}>Perfil</MenuItem>
+                            <MenuItem onClick={handleClose}>Minha Conta</MenuItem>
+                            <MenuItem onClick={handleLogout}>Sair</MenuItem>
                         </Menu>
                     </div>
             </Toolbar>

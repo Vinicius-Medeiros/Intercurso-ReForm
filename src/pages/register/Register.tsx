@@ -7,6 +7,7 @@ import { OptionsObject, useSnackbar } from 'notistack';
 import { closeIconStyles } from './constant';
 import { CnpjRequest, verifyCnpj } from '../../Services/receitaWS';
 import { useNavigate } from 'react-router';
+import axios from 'axios';
 
 
 enum CnpjState {
@@ -54,9 +55,16 @@ export const RegisterPage = () => {
     const navigate = useNavigate()
 
     const [cnpjState, setCnpjState] = useState<CnpjState>(CnpjState.None)
-    const [cnpj, setCnpj] = useState<string>("")
     const [name, setName] = useState<string>("")
     const [email, setEmail] = useState<string>("")
+    const [cnpj, setCnpj] = useState<string>("")
+    const [cep, setCep] = useState<string>("")
+    const [logradouro, setLogradouro] = useState<string>("")
+    const [numero, setNumero] = useState<string>("")
+    const [complemento, setComplemento] = useState<string>("")
+    const [bairro, setBairro] = useState<string>("")
+    const [municipio, setMunicipio] = useState<string>("")
+    const [uf, setUf] = useState<string>("")
     const [pass, setPass] = useState<string>("")
     const [pass2, setpass2] = useState<string>("")
 
@@ -116,8 +124,39 @@ export const RegisterPage = () => {
             cnpjStateIcon = <RemoveRoundedIcon />
     }
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+      
+        if (pass != pass2) return  alert('senhas não coincidem');
+        
+
+        const postData ={
+            nome: name,
+            email,
+            cnpj,
+            logradouro,
+            numero,
+            complemento,
+            cep,
+            bairro,
+            municipio,
+            uf,
+            senha: pass
+        }
+        console.log('postData', postData)
+        try {
+            const response = await axios.post('http://localhost:8080/empresas', postData)
+            console.log(response)
+
+            if(response){
+                alert('Empresa cadastrada com sucesso!')
+                navigate("/login")
+            }
+            
+        } catch (error) {
+            console.log('erro ao cadastrar empresa',error)
+        }
     }
 
     return (
@@ -165,6 +204,7 @@ export const RegisterPage = () => {
                     id="nome"
                     label="Nome"
                     variant="outlined"
+                    type="text"
                     value={name}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                     sx={{
@@ -179,6 +219,90 @@ export const RegisterPage = () => {
                     type="email"
                     value={email}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="cep"
+                    label="CEP"
+                    variant="outlined"
+                    type="text"
+                    value={cep}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCep(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="logradouro"
+                    label="Endereço"
+                    variant="outlined"
+                    type="text"
+                    value={logradouro}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setLogradouro(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="numero"
+                    label="Numero"
+                    variant="outlined"
+                    type="text"
+                    value={numero}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNumero(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="complemento"
+                    label="Complemento"
+                    variant="outlined"
+                    type="text"
+                    value={complemento}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setComplemento(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="bairro"
+                    label="Bairro"
+                    variant="outlined"
+                    type="text"
+                    value={bairro}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setBairro(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="municipio"
+                    label="Municipio"
+                    variant="outlined"
+                    type="text"
+                    value={municipio}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setMunicipio(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="uf"
+                    label="UF"
+                    variant="outlined"
+                    type="text"
+                    value={uf}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setUf(e.target.value)}
                     sx={{
                         width: "100%",
                     }}
@@ -228,7 +352,7 @@ export const RegisterPage = () => {
                             width: "9.5rem",
                         }}
                     >
-                        Criar
+                        Criar Cadastro
                     </Button>
                 </Row>
             </Box></>

@@ -5,9 +5,9 @@ import { Box, Button, CircularProgress, InputAdornment, styled, TextField, Typog
 import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react"
 import { OptionsObject, useSnackbar } from 'notistack';
 import { closeIconStyles } from './constant';
-import { CnpjRequest, verifyCnpj } from '../../Services/receitaWS';
 import { useNavigate } from 'react-router';
 import axios from 'axios';
+import { CnpjRequest, verifyCnpj } from '../../services/receitaWS';
 
 
 enum CnpjState {
@@ -84,8 +84,7 @@ export const RegisterPage = () => {
             console.log(res.data)
             if (res.data.status != "OK" || res.data.situacao === "BAIXADA") {
                 setCnpjState(CnpjState.ERROR)
-                const { message, variant } = returnMsgToShow(res.data)
-                enqueueSnackbar(message, variant)
+                returnMsgToShow(res.data as CnpjRequest)
                 return;
             }
 
@@ -102,7 +101,7 @@ export const RegisterPage = () => {
                 setEmail(res.data.email);
 
 
-        }).catch(res => {
+    }).catch(res => {
             console.log(res)
             setCnpjState(CnpjState.ERROR)
             enqueueSnackbar("Serviço ocupado, tente novamente mais tarde!", { variant: "warning", })
@@ -128,7 +127,9 @@ export const RegisterPage = () => {
         event.preventDefault();
 
       
-        if (pass != pass2) return  alert('senhas não coincidem');
+        if (pass != pass2) 
+            return  enqueueSnackbar('senhas não coincidem', {variant: "error"})
+
         
 
         const postData ={
@@ -150,7 +151,7 @@ export const RegisterPage = () => {
             console.log(response)
 
             if(response){
-                alert('Empresa cadastrada com sucesso!')
+                enqueueSnackbar('Empresa cadastrada com sucesso!', {variant: "success"})
                 navigate("/login")
             }
             

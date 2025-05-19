@@ -30,6 +30,6 @@ const api = axios.create({
     baseURL: "/api", // Use the proxy
 });
 
-export const verifyCnpj = async (cnpj: string): Promise<AxiosResponse<CnpjRequest>> => {
+export const verifyCnpj = async (cnpj: string): Promise<AxiosResponse<any>> => {
     return await api.get(cnpj);
 };

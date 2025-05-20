@@ -58,6 +58,7 @@ export const RegisterPage = () => {
     const [name, setName] = useState<string>("")
     const [email, setEmail] = useState<string>("")
     const [cnpj, setCnpj] = useState<string>("")
+    const [telefone, setTelefone] = useState<string>("")
     const [cep, setCep] = useState<string>("")
     const [logradouro, setLogradouro] = useState<string>("")
     const [numero, setNumero] = useState<string>("")
@@ -136,6 +137,7 @@ export const RegisterPage = () => {
             nome: name,
             email,
             cnpj,
+            telefone,
             logradouro,
             numero,
             complemento,
@@ -220,6 +222,18 @@ export const RegisterPage = () => {
                     type="email"
                     value={email}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                    sx={{
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="telefone"
+                    label="Telefone"
+                    variant="outlined"
+                    type="text"
+                    value={telefone}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setTelefone(e.target.value)}
                     sx={{
                         width: "100%",
                     }}

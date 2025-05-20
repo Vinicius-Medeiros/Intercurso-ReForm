@@ -5,6 +5,7 @@ import { ChangeEvent, FormEvent, MouseEvent, useRef, useState } from "react"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { useDispatch } from 'react-redux';
 import { login } from '../../store/slices/authSlice';
+import axios from "axios"
 
 export const LoginPage = () => {
     const {
@@ -21,6 +22,7 @@ export const LoginPage = () => {
     const [loginValue, setLoginValue] = useState<String>("")
     const [password, setPassword] = useState<String>("")
     const [showPassword, setShowPassword] = useState<boolean>(false)
+   
 
     const disableButton: boolean = !loginValue || !password
 
@@ -40,21 +42,34 @@ export const LoginPage = () => {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-
+        const postData ={
+            cnpj: loginValue,
+            senha: password
+        }
+        
         try {
             // Here you would typically make an API call to authenticate
             // For now, we'll simulate a successful login
-            const mockResponse = {
-                user: { login: loginValue },
-                accessToken: 'mock-access-token',
-                refreshToken: 'mock-refresh-token'
-            };
+            // const mockResponse = {
+            //     user: { login: loginValue },
+            //     accessToken: 'mock-access-token',
+            //     refreshToken: 'mock-refresh-token'
+            // };
 
-            dispatch(login(mockResponse));
+            // dispatch(login(mockResponse));
+            console.log('postData', postData)
+
+            const response = await axios.post('http://localhost:8080/authentication/login', postData)
+            .then(function(res){
+                console.log(res.data)
+                return res.data
+            })
+            console.log("response", response.data)
+            localStorage.setItem('user', JSON.stringify(response.data))
             
             enqueueSnackbar("Logado com sucesso!", {variant: "success"})
-            setLoginValue("")
-            setPassword("")
+            // setLoginValue("")
+            // setPassword("")
             navigate("/home")
         } catch (error) {
             enqueueSnackbar("Erro ao fazer login!", {variant: "error"})

@@ -4,8 +4,8 @@ import { useSnackbar } from "notistack"
 import { ChangeEvent, FormEvent, MouseEvent, useRef, useState } from "react"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { useDispatch } from 'react-redux';
-import { login } from '../../store/slices/authSlice';
-import axios from "axios"
+import { Login } from "../../services/auth"
+import { login } from "../../store/slices/authSlice"
 
 export const LoginPage = () => {
     const {
@@ -19,10 +19,9 @@ export const LoginPage = () => {
     const [email, setEmail] = useState<string>("")
     const PassInputRef = useRef<HTMLInputElement>(null)
     const LoginInputRef = useRef<HTMLInputElement>(null)
-    const [loginValue, setLoginValue] = useState<String>("")
-    const [password, setPassword] = useState<String>("")
+    const [loginValue, setLoginValue] = useState<string>("")
+    const [password, setPassword] = useState<string>("")
     const [showPassword, setShowPassword] = useState<boolean>(false)
-   
 
     const disableButton: boolean = !loginValue || !password
 
@@ -42,44 +41,21 @@ export const LoginPage = () => {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const postData ={
-            cnpj: loginValue,
-            senha: password
-        }
-        
-        try {
-            // Here you would typically make an API call to authenticate
-            // For now, we'll simulate a successful login
-            // const mockResponse = {
-            //     user: { login: loginValue },
-            //     accessToken: 'mock-access-token',
-            //     refreshToken: 'mock-refresh-token'
-            // };
+        Login({ cnpj: loginValue, senha: password }).then((res) => {            
+            dispatch(login({ user: res.data }));
 
-            // dispatch(login(mockResponse));
-            console.log('postData', postData)
-
-            const response = await axios.post('http://localhost:8080/authentication/login', postData)
-            .then(function(res){
-                console.log(res.data)
-                return res.data
-            })
-            console.log("response", response.data)
-            localStorage.setItem('user', JSON.stringify(response.data))
+            enqueueSnackbar("Logado com sucesso!", { variant: "success" })
             
-            enqueueSnackbar("Logado com sucesso!", {variant: "success"})
-            // setLoginValue("")
-            // setPassword("")
-            navigate("/home")
-        } catch (error) {
-            enqueueSnackbar("Erro ao fazer login!", {variant: "error"})
-        }
+            navigate("/dashboard")
+        }).catch((_err) => {
+            enqueueSnackbar("Erro ao fazer login!", { variant: "error" })
+        })
     }
 
     const handleRecoverPassword = (event: FormEvent<HTMLDivElement>) => {
         event.preventDefault();
 
-        enqueueSnackbar("Email de recuperação enviado com sucesso!", {variant: "success"})
+        enqueueSnackbar("Email de recuperação enviado com sucesso!", { variant: "success" })
 
         setModalOpen(false);
         setEmail("")

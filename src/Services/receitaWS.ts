@@ -27,9 +27,9 @@ export type CnpjRequest = {
 }
 
 const api = axios.create({
-    baseURL: "/api", // Use the proxy
+    baseURL: "/receitaWS", // Use the proxy
 });
 
-export const verifyCnpj = async (cnpj: string): Promise<AxiosResponse<any>> => {
+export const verifyCnpj = async (cnpj: string): Promise<AxiosResponse<CnpjRequest>> => {
     return await api.get(cnpj);
 };

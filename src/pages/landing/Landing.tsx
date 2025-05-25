@@ -125,7 +125,7 @@ const Landing = () => {
             </Container>
 
             {/* About Section */}
-            <Box sx={{ bgcolor: 'grey.100', py: 8 }}>
+            <Box sx={{ bgcolor: 'rgba(0,0,0,.1)', py: 8 }}>
                 <Container maxWidth="lg">
                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems="center">
                         <Box sx={{ flex: 1 }}>
@@ -141,18 +141,6 @@ const Landing = () => {
                                 Nossa missão é transformar o modo como as empresas lidam com seus materiais excedentes, 
                                 criando uma rede de colaboração que beneficia tanto o meio ambiente quanto o setor industrial.
                             </Typography>
-                        </Box>
-                        <Box sx={{ flex: 1 }}>
-                            <Box
-                                component="img"
-                                src={uniforlogo}
-                                alt="Campus UNIFOR"
-                                sx={{
-                                    width: '100%',
-                                    borderRadius: 2,
-                                    boxShadow: 3
-                                }}
-                            />
                         </Box>
                     </Stack>
                 </Container>

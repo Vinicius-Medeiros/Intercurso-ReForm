@@ -4,7 +4,7 @@ import { Environment } from "../environment";
 let isRefreshing: boolean = false;
 let requestQueue: any[] = [];
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: Environment.URL_API_BASE
 })
 
@@ -54,22 +54,22 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-interface CrudService {
+interface CrudService<C,U> {
   getList: () => Promise<any>;
   get: (id: number) => Promise<any>;
-  update: <T>(data: T) => Promise<any>;
-  create: <T>(data: T) => Promise<any>;
+  update: <U>(data: U) => Promise<any>;
+  create: <C>(data: C) => Promise<any>;
   delete: (id: number) => Promise<void>;
 }
 
-const CrudService = (path: string): CrudService => ({
+export const CrudService = <C,U>(path: string): CrudService<C,U> => ({
   getList: async () => await api.get(`/${path}`),
 
   get: async (id: number) => await api.get(`/${path}/${id}`),
 
-  update: async <T>(data: T) => await api.put<T>(`/${path}/${(data as any).id}`, data),
+  update: async <U>(data: U) => await api.put<U>(`/${path}/${(data as any).id}`, data),
 
-  create: async <T>(data: T) => await api.post(`/${path}`, data),
+  create: async <C>(data: C) => await api.post(`/${path}`, data),
 
   delete: async (id: number) => await api.delete(`/${path}/${id}`),
 });

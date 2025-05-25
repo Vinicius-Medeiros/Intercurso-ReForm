@@ -6,16 +6,11 @@ import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react
 import { OptionsObject, useSnackbar } from 'notistack';
 import { closeIconStyles } from './constant';
 import { useNavigate } from 'react-router';
-import axios from 'axios';
 import { CnpjRequest, verifyCnpj } from '../../services/receitaWS';
+import { CreateEmpresaModel } from '../../models/empresa';
+import { EmpresaService } from '../../services/empresa';
+import { LoadingState } from '../../utils/enums';
 
-
-enum CnpjState {
-    None,
-    Success,
-    Loading,
-    ERROR,
-}
 
 interface ReturnMsgToShowType {
     message: String | undefined
@@ -54,7 +49,9 @@ export const RegisterPage = () => {
 
     const navigate = useNavigate()
 
-    const [cnpjState, setCnpjState] = useState<CnpjState>(CnpjState.None)
+    const [cnpjState, setCnpjState] = useState<LoadingState>(LoadingState.None)
+    const [formState, setFormeState] = useState<LoadingState>(LoadingState.None)
+
     const [name, setName] = useState<string>("")
     const [email, setEmail] = useState<string>("")
     const [cnpj, setCnpj] = useState<string>("")
@@ -72,7 +69,7 @@ export const RegisterPage = () => {
 
     useEffect(() => {
         if (cnpj.length < 14) {
-            setCnpjState(CnpjState.None)
+            setCnpjState(LoadingState.None)
             return;
         }
 
@@ -80,44 +77,52 @@ export const RegisterPage = () => {
             return;
 
 
-        setCnpjState(CnpjState.Loading)
+        setCnpjState(LoadingState.Loading)
         verifyCnpj(cnpj).then(res => {
             console.log(res.data)
-            if (res.data.status != "OK" || res.data.situacao === "BAIXADA") {
-                setCnpjState(CnpjState.ERROR)
+            if (res.data.status != "OK") {
+                setCnpjState(LoadingState.ERROR)
                 returnMsgToShow(res.data as CnpjRequest)
                 return;
             }
 
             //sucesso
-            setCnpjState(CnpjState.Success)
+            setCnpjState(LoadingState.Success)
             enqueueSnackbar("CNPJ validado com sucesso!", { variant: "success", })
-            if (res.data.fantasia)
-                setName(res.data.fantasia);
 
-            else if (res.data.nome)
-                setName(res.data.nome);
+            setName(old =>
+                res.data.fantasia ||
+                res.data.nome ||
+                old
+            )
+            setEmail(old => res.data.email || old);
+            setTelefone(old => res.data.telefone || old);
+            setCep(old => res.data.cep || old);
+            setEmail(old => res.data.email || old);
+            setLogradouro(old => res.data.logradouro || old);
+            setNumero(old => res.data.numero || old);
+            setComplemento(old => res.data.complemento || old);
+            setBairro(old => res.data.bairro || old);
+            setMunicipio(old => res.data.municipio || old);
+            setUf(old => res.data.uf || old);
 
-            if (res.data.email)
-                setEmail(res.data.email);
 
-
-    }).catch(res => {
+        }).catch(res => {
             console.log(res)
-            setCnpjState(CnpjState.ERROR)
+            setCnpjState(LoadingState.ERROR)
             enqueueSnackbar("Serviço ocupado, tente novamente mais tarde!", { variant: "warning", })
         })
     }, [cnpj])
 
     var cnpjStateIcon: ReactElement
     switch (cnpjState) {
-        case CnpjState.Loading:
+        case LoadingState.Loading:
             cnpjStateIcon = <CircularProgress size={32} />
             break;
-        case CnpjState.Success:
+        case LoadingState.Success:
             cnpjStateIcon = <CheckRoundedIcon />
             break;
-        case CnpjState.ERROR:
+        case LoadingState.ERROR:
             cnpjStateIcon = <CloseRoundedIcon onClick={() => setCnpj("")} sx={closeIconStyles} />
             break;
         default:
@@ -127,13 +132,11 @@ export const RegisterPage = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-      
-        if (pass != pass2) 
-            return  enqueueSnackbar('senhas não coincidem', {variant: "error"})
 
-        
+        if (pass != pass2)
+            return enqueueSnackbar('senhas não coincidem', { variant: "error" })
 
-        const postData ={
+        const postData: CreateEmpresaModel = {
             nome: name,
             email,
             cnpj,
@@ -148,18 +151,15 @@ export const RegisterPage = () => {
             senha: pass
         }
         console.log('postData', postData)
-        try {
-            const response = await axios.post('http://localhost:8080/empresas', postData)
-            console.log(response)
 
-            if(response){
-                enqueueSnackbar('Empresa cadastrada com sucesso!', {variant: "success"})
-                navigate("/login")
-            }
-            
-        } catch (error) {
-            console.log('erro ao cadastrar empresa',error)
-        }
+        setFormeState(LoadingState.Loading)
+
+        EmpresaService.create(postData).then(() => {
+            enqueueSnackbar('Empresa cadastrada com sucesso!', { variant: "success" })
+            navigate("/login")
+        }).catch( () => {
+            enqueueSnackbar('Error ao cadastrar empresa!', { variant: "error" })
+        }).finally(() => setFormeState(LoadingState.None))
     }
 
     return (
@@ -179,7 +179,7 @@ export const RegisterPage = () => {
             >
                 <TextField
                     // inputRef={PassInputRef}
-                    disabled={cnpjState == CnpjState.Loading}
+                    disabled={cnpjState == LoadingState.Loading}
                     id="cnpj"
                     label="CNPJ"
                     variant="outlined"
@@ -285,7 +285,6 @@ export const RegisterPage = () => {
                     sx={{
                         width: "100%",
                     }}
-                    required
                 />
                 <TextField
                     id="bairro"
@@ -366,6 +365,7 @@ export const RegisterPage = () => {
                         sx={{
                             width: "9.5rem",
                         }}
+                        disabled = {formState == LoadingState.Loading}
                     >
                         Criar Cadastro
                     </Button>

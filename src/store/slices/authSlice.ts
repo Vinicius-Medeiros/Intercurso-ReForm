@@ -1,55 +1,36 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { EmpresaModal } from '../../models/empresa';
 
 interface AuthState {
     isAuthenticated: boolean;
-    user: {
-        login: string;
-        // Add other user properties as needed
-    } | null;
-    accessToken: string | null;
-    refreshToken: string | null;
+    user: EmpresaModal | null;
 }
 
 const initialState: AuthState = {
     isAuthenticated: false,
     user: null,
-    accessToken: localStorage.getItem('accessToken'),
-    refreshToken: localStorage.getItem('refreshToken'),
 };
 
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        login: (state, action: PayloadAction<{ user: any; accessToken: string; refreshToken: string }>) => {
+        login: (state, action: PayloadAction<{ user: EmpresaModal }>) => {
             state.isAuthenticated = true;
             state.user = action.payload.user;
-            state.accessToken = action.payload.accessToken;
-            state.refreshToken = action.payload.refreshToken;
             
             // Store tokens in localStorage
-            localStorage.setItem('accessToken', action.payload.accessToken);
-            localStorage.setItem('refreshToken', action.payload.refreshToken);
+            localStorage.setItem('user', JSON.stringify(action.payload.user));
         },
         logout: (state) => {
             state.isAuthenticated = false;
             state.user = null;
-            state.accessToken = null;
-            state.refreshToken = null;
             
             // Clear tokens from localStorage
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-        },
-        updateTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string }>) => {
-            state.accessToken = action.payload.accessToken;
-            state.refreshToken = action.payload.refreshToken;
-            
-            localStorage.setItem('accessToken', action.payload.accessToken);
-            localStorage.setItem('refreshToken', action.payload.refreshToken);
+            localStorage.removeItem('user');
         },
     },
 });
 
-export const { login, logout, updateTokens } = authSlice.actions;
+export const { login, logout } = authSlice.actions;
 export default authSlice.reducer; 

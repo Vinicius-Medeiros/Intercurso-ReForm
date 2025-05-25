@@ -92,11 +92,41 @@ export const Header = () => {
                                 vertical: 'top',
                                 horizontal: 'right',
                             }}
+                            sx={(theme) => ({
+                                "& .MuiPaper-root": {
+                                    top: "65px !important",
+                                    left: "1795px !important",
+                                    overflow: 'visible',
+                                    "&::before, &::after": {
+                                        content: '""',
+                                        position: 'absolute',
+                                        display: 'block',
+                                        width: 0,
+                                        height: 0,
+                                        right: '40%',
+                                    },
+                                    "&::before": {
+                                        top: '-12px',
+                                        borderLeft: '12px solid transparent',
+                                        borderRight: '12px solid transparent',
+                                        borderBottom: '12px solid rgba(0,0,0,0.12)',
+                                    },
+                                    "&::after": {
+                                        top: '-6px',
+                                        borderLeft: '10px solid transparent',
+                                        borderRight: '10px solid transparent',
+                                        borderBottom: `10px solid ${theme.palette.background.paper}`,
+                                    }
+                                },
+                                "& .MuiList-root": {
+                                    position: 'relative',
+                                }
+                            })}
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                         >
-                            <MenuItem onClick={handleClose}>Perfil</MenuItem>
-                            <MenuItem onClick={handleClose}>Minha Conta</MenuItem>
+                            <MenuItem onClick={() => {handleClose(); navigate("/dashboard/account")}}>Minha Conta</MenuItem>
+                            <MenuItem onClick={() => {handleClose(); navigate("/dashboard/contracts")}}>Contratos</MenuItem>
                             <MenuItem onClick={handleLogout}>Sair</MenuItem>
                         </Menu>
                     </div>

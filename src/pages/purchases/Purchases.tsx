@@ -1,11 +1,30 @@
-import { Box, Typography, TextField, InputAdornment, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Select, MenuItem, FormControl, InputLabel, Tooltip, Menu } from '@mui/material';
-import { Search, Add, Edit, Delete, Visibility, MoreVert } from '@mui/icons-material';
-import { useState } from 'react';
-import { ContractState } from '../../enums/ContractState';
+import { Delete, Edit, MoreVert, Search, Visibility } from '@mui/icons-material';
+import {
+    Box,
+    FormControl,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    Menu,
+    MenuItem,
+    Paper,
+    Select,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    TextField,
+    Typography
+} from '@mui/material';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ptBR } from 'date-fns/locale';
+import { useState } from 'react';
+import { ContractState } from '../../enums/ContractState';
 
 interface Purchase {
     id: number;
@@ -30,102 +49,102 @@ export const PurchasesPage = () => {
 
     // Dados de exemplo - substituir por dados reais da API
     const [purchases, setPurchases] = useState<Purchase[]>([
-        { 
-            id: 1, 
-            companyName: 'Construtora ABC', 
-            cnpj: '12.345.678/0001-90', 
-            material: 'Areia', 
-            quantity: 1000, 
+        {
+            id: 1,
+            companyName: 'Construtora ABC',
+            cnpj: '12.345.678/0001-90',
+            material: 'Areia',
+            quantity: 1000,
             value: 150.00,
             status: ContractState.PENDING,
             date: '2025-03-15'
         },
-        { 
-            id: 2, 
-            companyName: 'Materiais XYZ', 
-            cnpj: '98.765.432/0001-10', 
-            material: 'Cimento', 
-            quantity: 500, 
+        {
+            id: 2,
+            companyName: 'Materiais XYZ',
+            cnpj: '98.765.432/0001-10',
+            material: 'Cimento',
+            quantity: 500,
             value: 225.00,
             status: ContractState.ACCEPTED,
             date: '2025-03-14'
         },
-        { 
-            id: 3, 
-            companyName: 'Construções 123', 
-            cnpj: '45.678.901/0001-23', 
-            material: 'Brita', 
-            quantity: 750, 
+        {
+            id: 3,
+            companyName: 'Construções 123',
+            cnpj: '45.678.901/0001-23',
+            material: 'Brita',
+            quantity: 750,
             value: 187.50,
             status: ContractState.COMPLETED,
             date: '2025-03-13'
         },
-        { 
-            id: 4, 
-            companyName: 'Construções 456', 
-            cnpj: '23.456.789/0001-45', 
-            material: 'Pedra', 
-            quantity: 1200, 
+        {
+            id: 4,
+            companyName: 'Construções 456',
+            cnpj: '23.456.789/0001-45',
+            material: 'Pedra',
+            quantity: 1200,
             value: 360.00,
             status: ContractState.REJECTED,
             date: '2025-03-12'
         },
-        { 
-            id: 5, 
-            companyName: 'Materiais 789', 
-            cnpj: '34.567.890/0001-56', 
-            material: 'Tijolo', 
-            quantity: 2000, 
+        {
+            id: 5,
+            companyName: 'Materiais 789',
+            cnpj: '34.567.890/0001-56',
+            material: 'Tijolo',
+            quantity: 2000,
             value: 1600.00,
             status: ContractState.CANCELLED,
             date: '2025-03-11'
         },
-        { 
-            id: 6, 
-            companyName: 'Construções Delta', 
-            cnpj: '56.789.012/0001-78', 
-            material: 'Argamassa', 
-            quantity: 800, 
+        {
+            id: 6,
+            companyName: 'Construções Delta',
+            cnpj: '56.789.012/0001-78',
+            material: 'Argamassa',
+            quantity: 800,
             value: 320.00,
             status: ContractState.PENDING,
             date: '2025-03-10'
         },
-        { 
-            id: 7, 
-            companyName: 'Materiais Omega', 
-            cnpj: '67.890.123/0001-89', 
-            material: 'Cal', 
-            quantity: 600, 
+        {
+            id: 7,
+            companyName: 'Materiais Omega',
+            cnpj: '67.890.123/0001-89',
+            material: 'Cal',
+            quantity: 600,
             value: 180.00,
             status: ContractState.ACCEPTED,
             date: '2025-03-09'
         },
-        { 
-            id: 8, 
-            companyName: 'Construções Sigma', 
-            cnpj: '78.901.234/0001-90', 
-            material: 'Aço', 
-            quantity: 1500, 
+        {
+            id: 8,
+            companyName: 'Construções Sigma',
+            cnpj: '78.901.234/0001-90',
+            material: 'Aço',
+            quantity: 1500,
             value: 4500.00,
             status: ContractState.COMPLETED,
             date: '2025-03-08'
         },
-        { 
-            id: 9, 
-            companyName: 'Materiais Beta', 
-            cnpj: '89.012.345/0001-01', 
-            material: 'Tinta', 
-            quantity: 300, 
+        {
+            id: 9,
+            companyName: 'Materiais Beta',
+            cnpj: '89.012.345/0001-01',
+            material: 'Tinta',
+            quantity: 300,
             value: 900.00,
             status: ContractState.REJECTED,
             date: '2025-03-07'
         },
-        { 
-            id: 10, 
-            companyName: 'Construções Gama', 
-            cnpj: '90.123.456/0001-12', 
-            material: 'Vidro', 
-            quantity: 400, 
+        {
+            id: 10,
+            companyName: 'Construções Gama',
+            cnpj: '90.123.456/0001-12',
+            material: 'Vidro',
+            quantity: 400,
             value: 1200.00,
             status: ContractState.CANCELLED,
             date: '2025-03-06'
@@ -137,11 +156,11 @@ export const PurchasesPage = () => {
         const formattedCnpj = purchase.cnpj;
         const unformattedCnpj = purchase.cnpj.replace(/\D/g, '');
         const purchaseDate = new Date(purchase.date);
-        
+
         const startDateNoTime = startDate ? new Date(startDate.setHours(0, 0, 0, 0)) : null;
         const endDateNoTime = endDate ? new Date(endDate.setHours(23, 59, 59, 999)) : null;
         const purchaseDateNoTime = new Date(purchaseDate.setHours(0, 0, 0, 0));
-        
+
         const matchesSearch = (
             purchase.companyName.toLowerCase().includes(searchTermLower) ||
             purchase.material.toLowerCase().includes(searchTermLower) ||
@@ -151,8 +170,8 @@ export const PurchasesPage = () => {
 
         const matchesStatus = statusFilter === 'todos' || purchase.status === statusFilter;
 
-        const matchesDate = (!startDateNoTime || purchaseDateNoTime >= startDateNoTime) && 
-                          (!endDateNoTime || purchaseDateNoTime <= endDateNoTime);
+        const matchesDate = (!startDateNoTime || purchaseDateNoTime >= startDateNoTime) &&
+            (!endDateNoTime || purchaseDateNoTime <= endDateNoTime);
 
         return matchesSearch && matchesStatus && matchesDate;
     });
@@ -218,9 +237,9 @@ export const PurchasesPage = () => {
     };
 
     const isCancelDisabled = (status: ContractState) => {
-        return status === ContractState.COMPLETED || 
-               status === ContractState.REJECTED || 
-               status === ContractState.CANCELLED;
+        return status === ContractState.COMPLETED ||
+            status === ContractState.REJECTED ||
+            status === ContractState.CANCELLED;
     };
 
     return (
@@ -325,35 +344,35 @@ export const PurchasesPage = () => {
                                         },
                                     }}
                                 >
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
                                         {purchase.companyName}
                                     </TableCell>
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
                                         {purchase.cnpj}
                                     </TableCell>
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
                                         {purchase.material}
                                     </TableCell>
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
                                         {purchase.quantity.toLocaleString('pt-BR')} kg
                                     </TableCell>
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
@@ -438,7 +457,7 @@ export const PurchasesPage = () => {
                                                 <Edit fontSize="small" sx={{ mr: 1 }} />
                                                 Editar
                                             </MenuItem>
-                                            <MenuItem 
+                                            <MenuItem
                                                 onClick={() => handleDelete(purchase.id)}
                                                 disabled={isCancelDisabled(purchase.status)}
                                             >

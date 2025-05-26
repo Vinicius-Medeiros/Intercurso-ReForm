@@ -1,5 +1,20 @@
-import { Box, Typography, TextField, InputAdornment, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Tooltip } from '@mui/material';
 import { Search, Visibility } from '@mui/icons-material';
+import {
+    Box,
+    IconButton,
+    InputAdornment,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    TextField,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import { useState } from 'react';
 import { CompanyMaterialsModal } from '../../components/modals/CompanyMaterialsModal';
 import { Material } from '../../types/Material';
@@ -93,6 +108,16 @@ export const CompaniesPage = () => {
                 unit: 'un',
                 description: 'Tijolo cerâmico 9x19x19'
             }
+        ],
+        3: [
+            {
+                id: 1,
+                name: 'Areia',
+                category: 'Construção',
+                quantity: 5000,
+                unit: 'kg',
+                description: 'Areia média lavada'
+            }
         ]
     });
 
@@ -106,13 +131,28 @@ export const CompaniesPage = () => {
         const emailLower = company.email.toLowerCase().trim();
         const addressLower = company.address.toLowerCase().trim();
 
+        // Extrai os dígitos do termo de pesquisa uma vez
+        const searchTermDigitsOnly = searchTerm.replace(/\D/g, '');
+
         const matchesName = companyNameLower.includes(searchTermLower);
         const matchesEmail = emailLower.includes(searchTermLower);
         const matchesAddress = addressLower.includes(searchTermLower);
-        const matchesCnpj = formattedCnpj.includes(searchTerm) || unformattedCnpj.includes(searchTerm.replace(/\D/g, ''));
-        const matchesPhone = formattedPhone.includes(searchTerm) || unformattedPhone.includes(searchTerm.replace(/\D/g, ''));
+        const matchesCnpj =
+            formattedCnpj.includes(searchTerm) ||
+            (searchTermDigitsOnly !== '' && unformattedCnpj.includes(searchTermDigitsOnly));
+        const matchesPhone =
+            formattedPhone.includes(searchTerm) ||
+            (searchTermDigitsOnly !== '' && unformattedPhone.includes(searchTermDigitsOnly));
 
-        return matchesName || matchesEmail || matchesAddress || matchesCnpj || matchesPhone;
+        // Verifica se algum material da empresa corresponde ao termo de busca
+        const materials: Material[] = companyMaterials[company.id] || [];
+        const matchesMaterial = materials.some((material: Material) =>
+            material.name.toLowerCase().includes(searchTermLower) ||
+            material.category.toLowerCase().includes(searchTermLower) ||
+            material.description.toLowerCase().includes(searchTermLower)
+        );
+
+        return matchesName || matchesEmail || matchesAddress || matchesCnpj || matchesPhone || matchesMaterial;
     });
 
     const handleChangePage = (_event: unknown, newPage: number) => {
@@ -151,7 +191,7 @@ export const CompaniesPage = () => {
                 <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder="Pesquisar por empresa, CNPJ, email, telefone ou endereço..."
+                    placeholder="Pesquisar por empresa, CNPJ, email, telefone, endereço ou material..."
                     value={searchTerm}
                     onChange={(e) => {
                         setSearchTerm(e.target.value);
@@ -190,35 +230,35 @@ export const CompaniesPage = () => {
                                         },
                                     }}
                                 >
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
                                         {company.name}
                                     </TableCell>
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
                                         {company.cnpj}
                                     </TableCell>
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
                                         {company.email}
                                     </TableCell>
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
                                         {company.phone}
                                     </TableCell>
-                                    <TableCell sx={{ 
+                                    <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'

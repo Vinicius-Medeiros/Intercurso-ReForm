@@ -1,5 +1,17 @@
-import { Box, Dialog, DialogTitle, DialogContent, IconButton, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { Close } from '@mui/icons-material';
+import { Dialog,
+     DialogContent,
+     DialogTitle,
+     IconButton,
+     Paper,
+     Table,
+     TableBody,
+     TableCell,
+     TableContainer,
+     TableHead,
+     TableRow,
+     Typography 
+} from '@mui/material';
 import { Material } from '../../types/Material';
 
 interface CompanyMaterialsModalProps {

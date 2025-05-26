@@ -4,24 +4,28 @@ import { useState, useEffect } from 'react';
 interface EditMaterialModalProps {
     open: boolean;
     onClose: () => void;
-    onEdit: (id: number, name: string, quantity: number) => void;
+    onEdit: (id: number, name: string, quantity: number, pricePerKg: number) => void;
     material: {
         id: number;
         name: string;
         quantity: number;
+        pricePerKg: number;
     } | null;
 }
 
 export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMaterialModalProps) => {
     const [name, setName] = useState('');
     const [quantity, setQuantity] = useState('');
+    const [pricePerKg, setPricePerKg] = useState('');
     const [nameError, setNameError] = useState(false);
     const [quantityError, setQuantityError] = useState(false);
+    const [priceError, setPriceError] = useState(false);
 
     useEffect(() => {
         if (material) {
             setName(material.name);
             setQuantity(material.quantity.toString());
+            setPricePerKg(material.pricePerKg.toString());
         }
     }, [material]);
 
@@ -42,8 +46,15 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
             setQuantityError(false);
         }
 
+        if (!pricePerKg.trim() || isNaN(Number(pricePerKg)) || Number(pricePerKg) < 0) {
+            setPriceError(true);
+            hasError = true;
+        } else {
+            setPriceError(false);
+        }
+
         if (!hasError && material) {
-            onEdit(material.id, name, Number(quantity));
+            onEdit(material.id, name, Number(quantity), Number(pricePerKg));
             handleClose();
         }
     };
@@ -51,8 +62,10 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
     const handleClose = () => {
         setName('');
         setQuantity('');
+        setPricePerKg('');
         setNameError(false);
         setQuantityError(false);
+        setPriceError(false);
         onClose();
     };
 
@@ -96,6 +109,18 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
                         helperText={quantityError ? "Quantidade deve ser maior que 0" : ""}
                         InputProps={{
                             inputProps: { min: 0 }
+                        }}
+                    />
+                    <TextField
+                        label="Preço por kg (R$)"
+                        fullWidth
+                        type="number"
+                        value={pricePerKg}
+                        onChange={(e) => setPricePerKg(e.target.value)}
+                        error={priceError}
+                        helperText={priceError ? "Preço deve ser maior ou igual a 0" : ""}
+                        InputProps={{
+                            inputProps: { min: 0, step: "0.01" }
                         }}
                     />
                 </Box>

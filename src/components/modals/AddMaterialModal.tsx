@@ -4,14 +4,16 @@ import { useState } from 'react';
 interface AddMaterialModalProps {
     open: boolean;
     onClose: () => void;
-    onAdd: (name: string, quantity: number) => void;
+    onAdd: (name: string, quantity: number, pricePerKg: number) => void;
 }
 
 export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps) => {
     const [name, setName] = useState('');
     const [quantity, setQuantity] = useState('');
+    const [pricePerKg, setPricePerKg] = useState('');
     const [nameError, setNameError] = useState(false);
     const [quantityError, setQuantityError] = useState(false);
+    const [priceError, setPriceError] = useState(false);
 
     const handleSubmit = () => {
         let hasError = false;
@@ -30,8 +32,15 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
             setQuantityError(false);
         }
 
+        if (!pricePerKg.trim() || isNaN(Number(pricePerKg)) || Number(pricePerKg) < 0) {
+            setPriceError(true);
+            hasError = true;
+        } else {
+            setPriceError(false);
+        }
+
         if (!hasError) {
-            onAdd(name, Number(quantity));
+            onAdd(name, Number(quantity), Number(pricePerKg));
             handleClose();
         }
     };
@@ -39,8 +48,10 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
     const handleClose = () => {
         setName('');
         setQuantity('');
+        setPricePerKg('');
         setNameError(false);
         setQuantityError(false);
+        setPriceError(false);
         onClose();
     };
 
@@ -84,6 +95,18 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
                         helperText={quantityError ? "Quantidade deve ser maior que 0" : ""}
                         InputProps={{
                             inputProps: { min: 0 }
+                        }}
+                    />
+                    <TextField
+                        label="Preço por kg (R$)"
+                        fullWidth
+                        type="number"
+                        value={pricePerKg}
+                        onChange={(e) => setPricePerKg(e.target.value)}
+                        error={priceError}
+                        helperText={priceError ? "Preço deve ser maior ou igual a 0" : ""}
+                        InputProps={{
+                            inputProps: { min: 0, step: "0.01" }
                         }}
                     />
                 </Box>

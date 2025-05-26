@@ -9,10 +9,11 @@ import { useSelector } from "react-redux";
 import { RootState } from "./store";
 import { AccountPage } from "./pages/account/Account";
 import { MaterialsPage } from "./pages/materials/Materials";
-import { ContractsPage } from "./pages/contracts/Contracts";
-import { CompaniesPage } from "./pages/companies/Companies";
+import { PurchasesPage } from "./pages/purchases/Purchases";
+import { SalesPage } from "./pages/sales/Sales";
 import { InitAuth } from "./components/InitAuth";
 import { DashboardLayout } from "./layout/DashboardLayout";
+import { CompaniesPage } from "./pages/companies/Companies";
 
 const MainLayout = () => {
     return (
@@ -41,7 +42,8 @@ export const Router = () => {
                         <Route index element={<Navigate to="/dashboard/account" replace />} />
                         <Route path="account" element={<AccountPage />} />
                         <Route path="materials" element={<MaterialsPage />} />
-                        <Route path="contracts" element={<ContractsPage />} />
+                        <Route path="purchases" element={<PurchasesPage />} />
+                        <Route path="sales" element={<SalesPage />} />
                         <Route path="companies" element={<CompaniesPage />} />
                     </Route>
                 </Route>

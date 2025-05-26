@@ -45,8 +45,9 @@ export const BookmarkNav = () => {
     const bookmarks = [
         { label: 'Conta', id: 0, path: '/dashboard/account' },
         { label: 'Materiais', id: 1, path: '/dashboard/materials' },
-        { label: 'Compras', id: 2, path: '/dashboard/contracts' },
-        { label: 'Vendas', id: 3, path: '/dashboard/companies' },
+        { label: 'Compras', id: 2, path: '/dashboard/purchases' },
+        { label: 'Vendas', id: 3, path: '/dashboard/sales' },
+        { label: 'Empresas', id: 4, path: '/dashboard/companies' },
     ];
 
     const isActive = (path: string) => location.pathname === path;

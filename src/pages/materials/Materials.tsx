@@ -10,6 +10,7 @@ interface Material {
     id: number;
     name: string;
     quantity: number;
+    pricePerKg: number;
 }
 
 export const MaterialsPage = () => {
@@ -24,16 +25,11 @@ export const MaterialsPage = () => {
 
     // Dados de exemplo - substituir por dados reais da API
     const [materials, setMaterials] = useState<Material[]>([
-        { id: 1, name: 'Areia', quantity: 1000 },
-        { id: 2, name: 'Cimento', quantity: 500 },
-        { id: 3, name: 'Brita', quantity: 750 },
-        { id: 4, name: 'Pedra', quantity: 1000 },
-        { id: 5, name: 'Tijolo', quantity: 1000 },
-        { id: 6, name: 'Tijolo', quantity: 1000 },
-        { id: 7, name: 'Tijolo', quantity: 1000 },
-        { id: 8, name: 'Tijolo', quantity: 1000 },
-        { id: 9, name: 'Tijolo', quantity: 1000 },
-        { id: 10, name: 'Tijolo', quantity: 1000 },
+        { id: 1, name: 'Areia', quantity: 1000, pricePerKg: 0.15 },
+        { id: 2, name: 'Cimento', quantity: 500, pricePerKg: 0.45 },
+        { id: 3, name: 'Brita', quantity: 750, pricePerKg: 0.25 },
+        { id: 4, name: 'Pedra', quantity: 1000, pricePerKg: 0.30 },
+        { id: 5, name: 'Tijolo', quantity: 1000, pricePerKg: 0.80 },
     ]);
 
     const filteredMaterials = materials.filter(material =>
@@ -55,19 +51,20 @@ export const MaterialsPage = () => {
         page * rowsPerPage + rowsPerPage
     );
 
-    const handleAddMaterial = (name: string, quantity: number) => {
+    const handleAddMaterial = (name: string, quantity: number, pricePerKg: number) => {
         const newMaterial: Material = {
             id: materials.length + 1, // Em produção, isso viria do backend
             name,
-            quantity
+            quantity,
+            pricePerKg
         };
         setMaterials([...materials, newMaterial]);
         enqueueSnackbar('Material adicionado com sucesso!', { variant: 'success' });
     };
 
-    const handleEditMaterial = (id: number, name: string, quantity: number) => {
+    const handleEditMaterial = (id: number, name: string, quantity: number, pricePerKg: number) => {
         setMaterials(materials.map(material =>
-            material.id === id ? { ...material, name, quantity } : material
+            material.id === id ? { ...material, name, quantity, pricePerKg } : material
         ));
         enqueueSnackbar('Material atualizado com sucesso!', { variant: 'success' });
     };
@@ -87,6 +84,21 @@ export const MaterialsPage = () => {
     const openDeleteModal = (material: Material) => {
         setSelectedMaterial(material);
         setIsDeleteModalOpen(true);
+    };
+
+    const formatMaterialInfo = (material: Material) => {
+        return (
+            <>
+                <Box component="span" sx={{ fontWeight: 500 }}>Quantidade: </Box>
+                {material.quantity.toLocaleString('pt-BR')} kg
+                <br />
+                <Box component="span" sx={{ fontWeight: 500 }}>Preço por kg: </Box>
+                {material.pricePerKg.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                <br />
+                <Box component="span" sx={{ fontWeight: 500 }}>Valor total: </Box>
+                {(material.quantity * material.pricePerKg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </>
+        );
     };
 
     return (
@@ -170,7 +182,7 @@ export const MaterialsPage = () => {
                             >
                                 <ListItemText
                                     primary={material.name}
-                                    secondary={`Quantidade: ${material.quantity} kg`}
+                                    secondary={formatMaterialInfo(material)}
                                     sx={{
                                         '& .MuiListItemText-primary': {
                                             fontWeight: 'bold',

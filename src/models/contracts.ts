@@ -1,12 +1,15 @@
+import { ContractState } from "../enums/ContractState";
 import { EmpresaModal } from "./empresa";
 import { MaterialModal } from "./material";
 
 
-export interface Contract {
+export interface ContractModal {
     id: number;
     comprador: EmpresaModal;
     vendedor: EmpresaModal;
     quantidade: number;
-    valorTotal: number;
+    valor: number;
     material: MaterialModal;
+    status: ContractState;
+    data: Date;
 }

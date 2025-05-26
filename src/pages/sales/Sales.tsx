@@ -1,13 +1,13 @@
 import { Box, Typography } from '@mui/material';
 
-export const ContractsPage = () => {
+export const SalesPage = () => {
     return (
         <Box>
             <Typography variant="h4" component="h1" gutterBottom>
-                Compras
+                Empresas
             </Typography>
             <Typography variant="body1">
-                Gerencie suas compras aqui.
+                Gerencie suas vendas aqui.
             </Typography>
         </Box>
     );

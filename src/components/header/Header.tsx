@@ -126,7 +126,7 @@ export const Header = () => {
                             onClose={handleClose}
                         >
                             <MenuItem onClick={() => {handleClose(); navigate("/dashboard/account")}}>Minha Conta</MenuItem>
-                            <MenuItem onClick={() => {handleClose(); navigate("/dashboard/contracts")}}>Contratos</MenuItem>
+                            <MenuItem onClick={() => {handleClose(); navigate("/dashboard/purchases")}}>Contratos</MenuItem>
                             <MenuItem onClick={handleLogout}>Sair</MenuItem>
                         </Menu>
                     </div>

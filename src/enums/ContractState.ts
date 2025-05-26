@@ -1,0 +1,7 @@
+export enum ContractState {
+    PENDING = "PENDENTE",
+    ACCEPTED = "APROVADO",
+    REJECTED = "NEGADO",
+    CANCELLED = "CANCELADO",
+    COMPLETED = "CONCLUIDO",
+}

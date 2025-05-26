@@ -66,6 +66,7 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
             const calculatedValue = Number(newQuantity) * selectedMaterial.pricePerKg;
             setTotalValue(calculatedValue.toFixed(2));
         } else {
+            setQuantity('');
             setTotalValue('');
         }
     };
@@ -73,10 +74,9 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
     const handleTotalValueChange = (newValue: string) => {
         setTotalValue(newValue);
         if (selectedMaterial && newValue) {
-            const calculatedQuantity = Number(newValue) / selectedMaterial.pricePerKg;
-            setQuantity(calculatedQuantity.toFixed(2));
+            setTotalValue(newValue);
         } else {
-            setQuantity('');
+            setTotalValue('');
         }
     };
 
@@ -125,7 +125,7 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
                     sx={{
                         color: 'white',
                         '&:hover': {
-                            bgcolor: 'primary.dark',
+                            bgcolor: 'rgba(255, 255, 255, 0.3)'
                         }
                     }}
                 >
@@ -313,6 +313,7 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
                                     >
                                         Comprar
                                     </Button>
+
                                 </Box>
                             </Box>
                         </AccordionDetails>

@@ -1,17 +1,23 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box } from '@mui/material';
 import { useState } from 'react';
+import { Close } from '@mui/icons-material';
+import { IconButton, Typography } from '@mui/material';
 
 interface AddMaterialModalProps {
     open: boolean;
     onClose: () => void;
-    onAdd: (name: string, quantity: number, pricePerKg: number) => void;
+    onAdd: (name: string, category: string, description: string, quantity: number, pricePerKg: number) => void;
 }
 
 export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps) => {
     const [name, setName] = useState('');
+    const [category, setCategory] = useState('');
+    const [description, setDescription] = useState('');
     const [quantity, setQuantity] = useState('');
     const [pricePerKg, setPricePerKg] = useState('');
     const [nameError, setNameError] = useState(false);
+    const [categoryError, setCategoryError] = useState(false);
+    const [descriptionError, setDescriptionError] = useState(false);
     const [quantityError, setQuantityError] = useState(false);
     const [priceError, setPriceError] = useState(false);
 
@@ -23,6 +29,20 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
             hasError = true;
         } else {
             setNameError(false);
+        }
+
+        if (!category.trim()) {
+            setCategoryError(true);
+            hasError = true;
+        } else {
+            setCategoryError(false);
+        }
+
+        if (!description.trim()) {
+            setDescriptionError(true);
+            hasError = true;
+        } else {
+            setDescriptionError(false);
         }
 
         if (!quantity.trim() || isNaN(Number(quantity)) || Number(quantity) <= 0) {
@@ -40,16 +60,20 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
         }
 
         if (!hasError) {
-            onAdd(name, Number(quantity), Number(pricePerKg));
+            onAdd(name, category, description, Number(quantity), Number(pricePerKg));
             handleClose();
         }
     };
 
     const handleClose = () => {
         setName('');
+        setCategory('');
+        setDescription('');
         setQuantity('');
         setPricePerKg('');
         setNameError(false);
+        setCategoryError(false);
+        setDescriptionError(false);
         setQuantityError(false);
         setPriceError(false);
         onClose();
@@ -67,11 +91,29 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
             }}
         >
             <DialogTitle sx={{ 
-                bgcolor: 'secondary.main', 
-                color: 'white',
-                py: 2,
+                 m: 0, 
+                 p: 2, 
+                 display: 'flex', 
+                 justifyContent: 'space-between', 
+                 alignItems: 'center',
+                 bgcolor: 'secondary.dark',
+                 color: 'white'
             }}>
-                Adicionar Material
+                <Typography variant="h6" fontWeight="400">
+                    Adicionar Material
+                </Typography>
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
+                    sx={{
+                        color: 'white',
+                        '&:hover': {
+                            bgcolor: 'secondary.light',
+                        }
+                    }}
+                >
+                    <Close />
+                </IconButton>
             </DialogTitle>
             
             <DialogContent>
@@ -84,6 +126,24 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
                         error={nameError}
                         helperText={nameError ? "Nome é obrigatório" : ""}
                         autoFocus
+                    />
+                    <TextField
+                        label="Categoria"
+                        fullWidth
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        error={categoryError}
+                        helperText={categoryError ? "Categoria é obrigatória" : ""}
+                    />
+                    <TextField
+                        label="Descrição"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        error={descriptionError}
+                        helperText={descriptionError ? "Descrição é obrigatória" : ""}
                     />
                     <TextField
                         label="Quantidade (kg)"
@@ -113,7 +173,7 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={handleClose} color="inherit">
+                <Button onClick={handleClose} variant="outlined" color="secondary">
                     Cancelar
                 </Button>
                 <Button 

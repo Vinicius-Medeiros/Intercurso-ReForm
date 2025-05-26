@@ -87,16 +87,16 @@ export const CompaniesPage = () => {
                 name: 'Cimento',
                 category: 'Construção',
                 quantity: 1000,
-                unit: 'kg',
-                description: 'Cimento Portland CP-II-32'
+                description: 'Cimento Portland CP-II-32',
+                pricePerKg: 0.45
             },
             {
                 id: 2,
                 name: 'Areia',
                 category: 'Construção',
                 quantity: 5000,
-                unit: 'kg',
-                description: 'Areia média lavada'
+                description: 'Areia média lavada',
+                pricePerKg: 0.15
             }
         ],
         2: [
@@ -105,8 +105,8 @@ export const CompaniesPage = () => {
                 name: 'Tijolo',
                 category: 'Alvenaria',
                 quantity: 2000,
-                unit: 'un',
-                description: 'Tijolo cerâmico 9x19x19'
+                description: 'Tijolo cerâmico 9x19x19',
+                pricePerKg: 0.80
             }
         ],
         3: [
@@ -115,65 +115,65 @@ export const CompaniesPage = () => {
                 name: 'Areia',
                 category: 'Construção',
                 quantity: 5000,
-                unit: 'kg',
-                description: 'Areia média lavada'
+                description: 'Areia média lavada',
+                pricePerKg: 0.15
             },
             {
                 id: 2,
                 name: 'Tijolo',
                 category: 'Alvenaria',
                 quantity: 2000,
-                unit: 'un',
-                description: 'Tijolo cerâmico 9x19x19'
+                description: 'Tijolo cerâmico 9x19x19',
+                pricePerKg: 0.80
             },
             {
                 id: 3,
                 name: 'Cimento',
                 category: 'Construção',
                 quantity: 1000,
-                unit: 'kg',
-                description: 'Cimento Portland CP-II-32'
+                description: 'Cimento Portland CP-II-32',
+                pricePerKg: 0.45
             },
             {
                 id: 4,
                 name: 'Plástico',
                 category: 'Reciclagem',
                 quantity: 21000,
-                unit: 'kg',
-                description: 'Garrafa Pet'
+                description: 'Garrafa Pet',
+                pricePerKg: 0.05
             },
             {
                 id: 5,
                 name: 'Metal',
                 category: 'Reciclagem',
                 quantity: 76,
-                unit: 'kg',
-                description: 'Latinhas'
+                description: 'Latinhas',
+                pricePerKg: 0.10
             },
             {
                 id: 6,
                 name: 'Metal',
                 category: 'Reciclagem',
                 quantity: 76,
-                unit: 'kg',
-                description: 'Latinhas'
+                description: 'Latinhas',
+                pricePerKg: 0.10
             },
             {
                 id: 7,
                 name: 'Metal',
                 category: 'Reciclagem',
                 quantity: 76,
-                unit: 'kg',
-                description: 'Latinhas'
+                description: 'Latinhas',
+                pricePerKg: 0.10
             },
             {
                 id: 8,
                 name: 'Metal',
                 category: 'Reciclagem',
                 quantity: 76,
-                unit: 'kg',
-                description: 'Latinhas'
-            },
+                description: 'Latinhas',
+                pricePerKg: 0.10
+            }
         ]
     });
 
@@ -228,6 +228,16 @@ export const CompaniesPage = () => {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setSelectedCompany(null);
+    };
+
+    const handlePurchase = (materialId: number, quantity: number, totalValue: number) => {
+        // TODO: Implementar a lógica de compra
+        console.log('Compra realizada:', {
+            companyId: selectedCompany?.id,
+            materialId,
+            quantity,
+            totalValue
+        });
     };
 
     const paginatedCompanies = filteredCompanies.slice(
@@ -380,6 +390,7 @@ export const CompaniesPage = () => {
                     onClose={handleCloseModal}
                     companyName={selectedCompany.name}
                     materials={companyMaterials[selectedCompany.id] || []}
+                    onPurchase={handlePurchase}
                 />
             )}
         </Box>

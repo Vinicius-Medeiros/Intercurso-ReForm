@@ -25,8 +25,10 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { ptBR } from 'date-fns/locale';
 import { useState } from 'react';
 import { ContractState } from '../../enums/ContractState';
+import { EditPurchaseModal } from '../../components/modals/EditPurchaseModal';
+import { CancelPurchaseModal } from '../../components/modals/CancelPurchaseModal';
 
-interface Purchase {
+export interface Purchase {
     id: number;
     companyName: string;
     cnpj: string;
@@ -46,6 +48,10 @@ export const PurchasesPage = () => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(null);
+    const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [purchaseToCancel, setPurchaseToCancel] = useState<Purchase | null>(null);
 
     // Dados de exemplo - substituir por dados reais da API
     const [purchases, setPurchases] = useState<Purchase[]>([
@@ -223,12 +229,20 @@ export const PurchasesPage = () => {
 
     const handleEdit = (id: number) => {
         handleMenuClose();
-        console.log('Editar compra:', id);
+        const purchase = purchases.find(p => p.id === id);
+        if (purchase) {
+            setSelectedPurchase(purchase);
+            setIsEditModalOpen(true);
+        }
     };
 
     const handleDelete = (id: number) => {
         handleMenuClose();
-        console.log('Excluir compra:', id);
+        const purchase = purchases.find(p => p.id === id);
+        if (purchase) {
+            setPurchaseToCancel(purchase);
+            setIsCancelModalOpen(true);
+        }
     };
 
     const handleViewContract = (id: number) => {
@@ -240,6 +254,24 @@ export const PurchasesPage = () => {
         return status === ContractState.COMPLETED ||
             status === ContractState.REJECTED ||
             status === ContractState.CANCELLED;
+    };
+
+    const handleUpdatePurchase = (id: number, quantity: number, value: number) => {
+        setPurchases(purchases.map(purchase => 
+            purchase.id === id 
+                ? { ...purchase, quantity, value }
+                : purchase
+        ));
+    };
+
+    const handleConfirmCancel = (id: number) => {
+        setPurchases(purchases.map(purchase => 
+            purchase.id === id 
+                ? { ...purchase, status: ContractState.CANCELLED }
+                : purchase
+        ));
+        setIsCancelModalOpen(false);
+        setPurchaseToCancel(null);
     };
 
     return (
@@ -470,7 +502,10 @@ export const PurchasesPage = () => {
                                                 }
                                             })}
                                         >
-                                            <MenuItem onClick={() => handleEdit(purchase.id)}>
+                                            <MenuItem
+                                                onClick={() => handleEdit(purchase.id)}
+                                                disabled={isCancelDisabled(purchase.status)}
+                                             >
                                                 <Edit fontSize="small" sx={{ mr: 1 }} />
                                                 Editar
                                             </MenuItem>
@@ -511,6 +546,30 @@ export const PurchasesPage = () => {
                     labelDisplayedRows={({ from, to, count }) => `Página: ${from} / ${to} de ${count}`}
                 />
             </Paper>
+
+            {selectedPurchase && (
+                <EditPurchaseModal
+                    open={isEditModalOpen}
+                    onClose={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedPurchase(null);
+                    }}
+                    purchase={selectedPurchase}
+                    onUpdate={handleUpdatePurchase}
+                />
+            )}
+
+            {purchaseToCancel && (
+                <CancelPurchaseModal
+                    open={isCancelModalOpen}
+                    onClose={() => {
+                        setIsCancelModalOpen(false);
+                        setPurchaseToCancel(null);
+                    }}
+                    purchase={purchaseToCancel}
+                    onConfirm={handleConfirmCancel}
+                />
+            )}
         </Box>
     );
 }; 

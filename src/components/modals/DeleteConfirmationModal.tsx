@@ -1,4 +1,5 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, IconButton } from '@mui/material';
 
 interface DeleteConfirmationModalProps {
     open: boolean;
@@ -20,25 +21,43 @@ export const DeleteConfirmationModal = ({ open, onClose, onConfirm, materialName
             }}
         >
             <DialogTitle sx={{ 
-                bgcolor: 'error.main', 
-                color: 'white',
-                py: 2,
+                m: 0, 
+                p: 2, 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                bgcolor: 'error.main',
+                color: 'white'
             }}>
-                Remover Material
+                <Typography variant="h6">
+                    Remover Material
+                </Typography>
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
+                    sx={{
+                        color: 'white',
+                        '&:hover': {
+                            bgcolor: 'primary.main',
+                        }
+                    }}
+                >
+                    <Close />
+                </IconButton>
             </DialogTitle>
             
             <DialogContent sx={{ pt: 2, pb: 1 }}>
-                <Typography>
-                    Tem certeza que deseja remover o material <strong>{materialName}</strong>?
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    Esta ação não poderá ser desfeita.
+                <Typography sx={{ mt: 2 }}>
+                    Tem certeza que deseja remover o material{' '}
+                    <Typography component="span" fontWeight="bold" display="inline">
+                        {materialName}?
+                    </Typography>
                 </Typography>
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={onClose} color="inherit">
-                    Cancelar
+                <Button onClick={onClose} variant="outlined" color="error">
+                    Voltar
                 </Button>
                 <Button 
                     onClick={onConfirm}

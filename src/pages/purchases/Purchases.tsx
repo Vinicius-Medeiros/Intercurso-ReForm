@@ -320,7 +320,24 @@ export const PurchasesPage = () => {
             </Box>
 
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                <TableContainer sx={{ maxHeight: 'calc(100vh - 550px)' }}>
+                <TableContainer
+                    sx={(theme) => ({
+                        maxHeight: 'calc(100vh - 550px)',
+                        scrollbarColor: `${theme.palette.secondary.light} transparent`,
+                        scrollbarWidth: 'thin',
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                            background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            borderRadius: '4px',
+                            backgroundColor: 'rgba(0,0,0,.9)',
+                            '&:hover': {
+                                backgroundColor: 'rgba(0,0,0,.9)',
+                            },
+                        },
+                    })}
+                >
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>

@@ -62,7 +62,25 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials }:
                 </IconButton>
             </DialogTitle>
             <DialogContent dividers sx={{ p: 3 }}>
-                <TableContainer component={Paper} sx={{ maxHeight: 'calc(80vh - 200px)' }}>
+                <TableContainer
+                    component={Paper} 
+                    sx={(theme) => ({ 
+                        maxHeight: 'calc(80vh - 375px)',
+                        scrollbarColor: `${theme.palette.secondary.light} transparent`,
+                        scrollbarWidth: 'thin',
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                            background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            borderRadius: '4px',
+                            backgroundColor: 'rgba(0,0,0,.9)',
+                            '&:hover': {
+                                backgroundColor: 'rgba(0,0,0,.9)',
+                            },
+                        },
+                    })}
+                >
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>

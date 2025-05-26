@@ -117,7 +117,63 @@ export const CompaniesPage = () => {
                 quantity: 5000,
                 unit: 'kg',
                 description: 'Areia média lavada'
-            }
+            },
+            {
+                id: 2,
+                name: 'Tijolo',
+                category: 'Alvenaria',
+                quantity: 2000,
+                unit: 'un',
+                description: 'Tijolo cerâmico 9x19x19'
+            },
+            {
+                id: 3,
+                name: 'Cimento',
+                category: 'Construção',
+                quantity: 1000,
+                unit: 'kg',
+                description: 'Cimento Portland CP-II-32'
+            },
+            {
+                id: 4,
+                name: 'Plástico',
+                category: 'Reciclagem',
+                quantity: 21000,
+                unit: 'kg',
+                description: 'Garrafa Pet'
+            },
+            {
+                id: 5,
+                name: 'Metal',
+                category: 'Reciclagem',
+                quantity: 76,
+                unit: 'kg',
+                description: 'Latinhas'
+            },
+            {
+                id: 6,
+                name: 'Metal',
+                category: 'Reciclagem',
+                quantity: 76,
+                unit: 'kg',
+                description: 'Latinhas'
+            },
+            {
+                id: 7,
+                name: 'Metal',
+                category: 'Reciclagem',
+                quantity: 76,
+                unit: 'kg',
+                description: 'Latinhas'
+            },
+            {
+                id: 8,
+                name: 'Metal',
+                category: 'Reciclagem',
+                quantity: 76,
+                unit: 'kg',
+                description: 'Latinhas'
+            },
         ]
     });
 
@@ -208,7 +264,24 @@ export const CompaniesPage = () => {
             </Box>
 
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                <TableContainer sx={{ maxHeight: 'calc(100vh - 300px)' }}>
+                <TableContainer 
+                    sx={(theme) => ({ 
+                        maxHeight: 'calc(100vh - 300px)',
+                        scrollbarColor: `${theme.palette.secondary.light} transparent`,
+                        scrollbarWidth: 'thin',
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                            background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            borderRadius: '4px',
+                            backgroundColor: 'rgba(0,0,0,.9)',
+                            '&:hover': {
+                                backgroundColor: 'rgba(0,0,0,.9)',
+                            },
+                        },
+                    })}
+                >
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>

@@ -134,7 +134,7 @@ export const MaterialsPage = () => {
                     bgcolor: 'background.paper',
                 }}
             >
-                <Box>
+                <Box sx={{boxShadow: "none",}}>
                     <List
                         sx={(theme) => ({
                             maxHeight: 400,

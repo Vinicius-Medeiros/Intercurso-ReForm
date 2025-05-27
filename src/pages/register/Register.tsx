@@ -6,10 +6,10 @@ import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react
 import { OptionsObject, useSnackbar } from 'notistack';
 import { closeIconStyles } from './constant';
 import { useNavigate } from 'react-router';
-import { CnpjRequest, verifyCnpj } from '../../services/receitaWS';
 import { CreateEmpresaModel } from '../../models/empresa';
-import { EmpresaService } from '../../services/empresa';
 import { LoadingState } from '../../utils/enums';
+import { CnpjRequest, verifyCnpj } from '../../Services/receitaWS';
+import { EmpresaService } from '../../Services/empresa';
 
 
 interface ReturnMsgToShowType {

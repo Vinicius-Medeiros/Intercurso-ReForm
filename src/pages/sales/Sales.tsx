@@ -4,7 +4,7 @@ export const SalesPage = () => {
     return (
         <Box>
             <Typography variant="h4" component="h1" gutterBottom>
-                Empresas
+                Vendas
             </Typography>
             <Typography variant="body1">
                 Gerencie suas vendas aqui.

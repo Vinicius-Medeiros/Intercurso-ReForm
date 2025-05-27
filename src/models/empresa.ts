@@ -1,5 +1,5 @@
 export interface EnderecoModal {
-    id: number
+    id?: number
     logradouro: string;
     numero: string;
     complemento: string;

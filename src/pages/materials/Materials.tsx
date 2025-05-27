@@ -129,21 +129,6 @@ export const MaterialsPage = () => {
         setIsDeleteModalOpen(true);
     };
 
-    const formatMaterialInfo = (material: Material) => {
-        return (
-            <>
-                <Box component="span" sx={{ fontWeight: 500 }}>Quantidade: </Box>
-                {material.quantity.toLocaleString('pt-BR')} kg
-                <br />
-                <Box component="span" sx={{ fontWeight: 500 }}>Preço por kg: </Box>
-                {material.pricePerKg.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                <br />
-                <Box component="span" sx={{ fontWeight: 500 }}>Valor total: </Box>
-                {(material.quantity * material.pricePerKg).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </>
-        );
-    };
-
     return (
         <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>

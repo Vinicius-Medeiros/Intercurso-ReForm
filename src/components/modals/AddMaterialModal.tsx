@@ -1,12 +1,12 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box } from '@mui/material';
-import { useState } from 'react';
 import { Close } from '@mui/icons-material';
-import { IconButton, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, Typography } from '@mui/material';
+import { useState } from 'react';
+import { CreateMaterialRequest } from '../../Services/materialService';
 
 interface AddMaterialModalProps {
     open: boolean;
     onClose: () => void;
-    onAdd: (name: string, category: string, description: string, quantity: number, pricePerKg: number) => void;
+    onAdd: (data: CreateMaterialRequest) => void;
 }
 
 export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps) => {
@@ -14,7 +14,7 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
     const [quantity, setQuantity] = useState('');
-    const [pricePerKg, setPricePerKg] = useState('');
+    const [price, setPrice] = useState('');
     const [nameError, setNameError] = useState(false);
     const [categoryError, setCategoryError] = useState(false);
     const [descriptionError, setDescriptionError] = useState(false);
@@ -45,14 +45,14 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
             setDescriptionError(false);
         }
 
-        if (!quantity.trim() || isNaN(Number(quantity)) || Number(quantity) <= 0) {
+        if (quantity.trim() === '' || isNaN(Number(quantity)) || Number(quantity) < 0) {
             setQuantityError(true);
             hasError = true;
         } else {
             setQuantityError(false);
         }
 
-        if (!pricePerKg.trim() || isNaN(Number(pricePerKg)) || Number(pricePerKg) < 0) {
+        if (price.trim() === '' || isNaN(Number(price)) || Number(price) < 0) {
             setPriceError(true);
             hasError = true;
         } else {
@@ -60,7 +60,14 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
         }
 
         if (!hasError) {
-            onAdd(name, category, description, Number(quantity), Number(pricePerKg));
+            onAdd({
+                name,
+                category,
+                description,
+                quantity: Number(quantity),
+                price: Number(price),
+                unit: "kg"
+            });
             handleClose();
         }
     };
@@ -70,7 +77,7 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
         setCategory('');
         setDescription('');
         setQuantity('');
-        setPricePerKg('');
+        setPrice('');
         setNameError(false);
         setCategoryError(false);
         setDescriptionError(false);
@@ -146,23 +153,23 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
                         helperText={descriptionError ? "Descrição é obrigatória" : ""}
                     />
                     <TextField
-                        label="Quantidade (kg)"
+                        label="Quantidade"
                         fullWidth
                         type="number"
                         value={quantity}
                         onChange={(e) => setQuantity(e.target.value)}
                         error={quantityError}
-                        helperText={quantityError ? "Quantidade deve ser maior que 0" : ""}
+                        helperText={quantityError ? "Quantidade deve ser maior ou igual a 0" : ""}
                         InputProps={{
                             inputProps: { min: 0 }
                         }}
                     />
                     <TextField
-                        label="Preço por kg (R$)"
+                        label="Preço por unidade (R$)"
                         fullWidth
                         type="number"
-                        value={pricePerKg}
-                        onChange={(e) => setPricePerKg(e.target.value)}
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
                         error={priceError}
                         helperText={priceError ? "Preço deve ser maior ou igual a 0" : ""}
                         InputProps={{
@@ -186,4 +193,4 @@ export const AddMaterialModal = ({ open, onClose, onAdd }: AddMaterialModalProps
             </DialogActions>
         </Dialog>
     );
-}; 
+};

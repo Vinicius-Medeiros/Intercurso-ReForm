@@ -1,12 +1,12 @@
 import { Box, Dialog, DialogTitle, IconButton, Typography, DialogActions, Button } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { Purchase } from '../../pages/purchases/Purchases';
+import { Purchase } from '../../Services/purchaseService';
 
 interface CancelPurchaseModalProps {
     open: boolean;
     onClose: () => void;
     purchase: Purchase;
-    onConfirm: (id: number) => void;
+    onConfirm: (id: string) => void;
 }
 
 export const CancelPurchaseModal = ({ open, onClose, purchase, onConfirm }: CancelPurchaseModalProps) => {
@@ -52,11 +52,11 @@ export const CancelPurchaseModal = ({ open, onClose, purchase, onConfirm }: Canc
                 <Typography variant="body1">
                     Tem certeza que deseja cancelar a compra de{' '}
                     <Typography component="span" fontWeight="bold" display="inline">
-                        {purchase.material}
+                        {purchase.material.name}
                     </Typography>
                     {' '}da empresa{' '}
                     <Typography component="span" fontWeight="bold" display="inline">
-                        {purchase.companyName}?
+                        {purchase.seller.name}?
                     </Typography>
                 </Typography>
             </Box>

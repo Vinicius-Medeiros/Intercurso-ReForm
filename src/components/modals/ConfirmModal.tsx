@@ -17,6 +17,7 @@ interface ConfirmModalProps {
     message: string;
     confirmText?: string;
     cancelText?: string;
+    color?: string;
 }
 
 export const ConfirmModal = ({
@@ -26,7 +27,8 @@ export const ConfirmModal = ({
     title,
     message,
     confirmText = 'Confirmar',
-    cancelText = 'Cancelar'
+    cancelText = 'Cancelar',
+    color = '#EF5350' // Default to error color
 }: ConfirmModalProps) => {
     return (
         <Dialog
@@ -45,7 +47,7 @@ export const ConfirmModal = ({
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center',
-                bgcolor: 'error.main',
+                bgcolor: color,
                 color: 'white'
             }}>
                 <Typography variant="h6">{title}</Typography>
@@ -55,7 +57,7 @@ export const ConfirmModal = ({
                     sx={{
                         color: 'white',
                         '&:hover': {
-                            bgcolor: 'primary.main',
+                            bgcolor: 'rgba(255, 255, 255, 0.3)',
                         }
                     }}
                 >
@@ -66,7 +68,18 @@ export const ConfirmModal = ({
                 <Typography sx={{ mt: 2 }}>{message}</Typography>
             </DialogContent>
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={onClose} variant="outlined" color="error">
+                <Button 
+                    onClick={onClose} 
+                    variant="outlined" 
+                    sx={{ 
+                        borderColor: color,
+                        color: color,
+                        '&:hover': {
+                            borderColor: color,
+                            bgcolor: `${color}15`
+                        }
+                    }}
+                >
                     {cancelText}
                 </Button>
                 <Button
@@ -75,7 +88,13 @@ export const ConfirmModal = ({
                         onClose();
                     }}
                     variant="contained"
-                    color="error"
+                    sx={{ 
+                        bgcolor: color,
+                        '&:hover': {
+                            bgcolor: color,
+                            opacity: 0.9
+                        }
+                    }}
                 >
                     {confirmText}
                 </Button>

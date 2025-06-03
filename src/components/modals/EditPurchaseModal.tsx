@@ -1,20 +1,27 @@
 import { Box, Dialog, DialogTitle, DialogContent, IconButton, Typography, TextField, DialogActions, Button } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { useState } from 'react';
-import { Purchase } from '../../pages/purchases/Purchases';
+import { useEffect, useState } from 'react';
+import { Purchase, PurchaseStatus } from '../../Services/purchaseService';
 
 interface EditPurchaseModalProps {
     open: boolean;
     onClose: () => void;
-    purchase: Purchase
-    onUpdate: (id: number, quantity: number, value: number) => void;
+    purchase: Purchase;
+    onUpdate: (id: string, quantity: number, totalValue: number) => void;
 }
 
 export const EditPurchaseModal = ({ open, onClose, purchase, onUpdate }: EditPurchaseModalProps) => {
     const [quantity, setQuantity] = useState(purchase.quantity);
-    const [value, setValue] = useState(purchase.value);
+    const [totalValue, setTotalValue] = useState(purchase.totalValue);
     const [quantityError, setQuantityError] = useState('');
     const [valueError, setValueError] = useState('');
+
+    useEffect(() => {
+        setQuantity(purchase.quantity);
+        setTotalValue(purchase.totalValue);
+        setQuantityError('');
+        setValueError('');
+    }, [purchase]);
 
     const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = Number(event.target.value);
@@ -28,7 +35,7 @@ export const EditPurchaseModal = ({ open, onClose, purchase, onUpdate }: EditPur
 
     const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = Number(event.target.value);
-        setValue(newValue);
+        setTotalValue(newValue);
         if (newValue <= 0) {
             setValueError('O valor deve ser maior que zero');
         } else {
@@ -37,14 +44,31 @@ export const EditPurchaseModal = ({ open, onClose, purchase, onUpdate }: EditPur
     };
 
     const handleUpdate = () => {
-        if (quantity <= 0 || value <= 0) {
+        if (quantity <= 0 || totalValue <= 0) {
             return;
         }
-        onUpdate(purchase.id, quantity, value);
+        onUpdate(purchase.id, quantity, totalValue);
         onClose();
     };
 
-    const isFormValid = quantity > 0 && value > 0;
+    const isFormValid = quantity > 0 && totalValue > 0;
+
+    const getStatusLabel = (status: PurchaseStatus) => {
+        switch (status) {
+            case PurchaseStatus.PENDING:
+                return 'PENDENTE'; // Laranja
+            case PurchaseStatus.APPROVED:
+                return 'APROVADA'; // Verde
+            case PurchaseStatus.COMPLETED:
+                return 'CONCLUÍDA'; // Azul
+            case PurchaseStatus.DENIED:
+                return 'NEGADA'; // Vermelho
+            case PurchaseStatus.CANCELLED:
+                return 'CANCELADA'; // Cinza
+            default:
+                return 'DESCONHECIDO';
+        }
+    };
 
     return (
         <Dialog
@@ -72,11 +96,11 @@ export const EditPurchaseModal = ({ open, onClose, purchase, onUpdate }: EditPur
                 <Typography variant="h6" fontWeight="400">
                     Alterar compra de:{' '}
                     <Typography component="span" variant="h6" fontWeight="bolder" display="inline">
-                        {purchase.material}
+                        {purchase.material.name}
                     </Typography>
                     {' '}da empresa{' '}
                     <Typography component="span" variant="h6" fontWeight="bolder" display="inline">
-                        {purchase.companyName}
+                        {purchase.seller.name}
                     </Typography>
                 </Typography>
                 <IconButton
@@ -102,14 +126,14 @@ export const EditPurchaseModal = ({ open, onClose, purchase, onUpdate }: EditPur
                         error={!!quantityError}
                         helperText={quantityError}
                         InputProps={{
-                            endAdornment: <Typography>kg</Typography>
+                            endAdornment: <Typography>{purchase.material.unit || 'kg'}</Typography>
                         }}
                         fullWidth
                     />
                     <TextField
-                        label="Valor"
+                        label="Valor Total"
                         type="number"
-                        value={value}
+                        value={totalValue}
                         onChange={handleValueChange}
                         error={!!valueError}
                         helperText={valueError}
@@ -121,7 +145,7 @@ export const EditPurchaseModal = ({ open, onClose, purchase, onUpdate }: EditPur
                     <TextField
                         label="Status da Compra"
                         type="string"
-                        value={purchase.status}
+                        value={getStatusLabel(purchase.status)}
                         variant="outlined"
                         fullWidth
                         focused

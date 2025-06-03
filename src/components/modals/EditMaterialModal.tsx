@@ -1,19 +1,13 @@
 import { Close } from '@mui/icons-material';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, IconButton, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
+import { Material, UpdateMaterialRequest } from '../../Services/materialService';
 
 interface EditMaterialModalProps {
     open: boolean;
     onClose: () => void;
-    onEdit: (id: number, name: string, category: string, description: string, quantity: number, pricePerKg: number) => void;
-    material: {
-        id: number;
-        name: string;
-        category: string;
-        description: string;
-        quantity: number;
-        pricePerKg: number;
-    } | null;
+    onEdit: (id: string, data: UpdateMaterialRequest) => void;
+    material: Material | null;
 }
 
 export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMaterialModalProps) => {
@@ -21,7 +15,7 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
     const [quantity, setQuantity] = useState('');
-    const [pricePerKg, setPricePerKg] = useState('');
+    const [price, setPrice] = useState('');
     const [nameError, setNameError] = useState(false);
     const [categoryError, setCategoryError] = useState(false);
     const [descriptionError, setDescriptionError] = useState(false);
@@ -34,7 +28,7 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
             setCategory(material.category);
             setDescription(material.description);
             setQuantity(material.quantity.toString());
-            setPricePerKg(material.pricePerKg.toString());
+            setPrice(material.price.toString());
         }
     }, [material]);
 
@@ -62,14 +56,14 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
             setDescriptionError(false);
         }
 
-        if (!quantity.trim() || isNaN(Number(quantity)) || Number(quantity) <= 0) {
+        if (!quantity.trim() || isNaN(Number(quantity)) || Number(quantity) < 0) {
             setQuantityError(true);
             hasError = true;
         } else {
             setQuantityError(false);
         }
 
-        if (!pricePerKg.trim() || isNaN(Number(pricePerKg)) || Number(pricePerKg) < 0) {
+        if (!price.trim() || isNaN(Number(price)) || Number(price) < 0) {
             setPriceError(true);
             hasError = true;
         } else {
@@ -77,7 +71,14 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
         }
 
         if (!hasError && material) {
-            onEdit(material.id, name, category, description, Number(quantity), Number(pricePerKg));
+            onEdit(material.id, {
+                name,
+                category,
+                description,
+                quantity: Number(quantity),
+                price: Number(price),
+                unit: "kg"
+            });
             handleClose();
         }
     };
@@ -87,7 +88,7 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
         setCategory('');
         setDescription('');
         setQuantity('');
-        setPricePerKg('');
+        setPrice('');
         setNameError(false);
         setCategoryError(false);
         setDescriptionError(false);
@@ -167,23 +168,23 @@ export const EditMaterialModal = ({ open, onClose, onEdit, material }: EditMater
                         helperText={descriptionError ? "Descrição é obrigatória" : ""}
                     />
                     <TextField
-                        label="Quantidade (kg)"
+                        label="Quantidade"
                         fullWidth
                         type="number"
                         value={quantity}
                         onChange={(e) => setQuantity(e.target.value)}
                         error={quantityError}
-                        helperText={quantityError ? "Quantidade deve ser maior que 0" : ""}
+                        helperText={quantityError ? "Quantidade deve ser maior ou igual a 0" : ""}
                         InputProps={{
                             inputProps: { min: 0 }
                         }}
                     />
                     <TextField
-                        label="Preço por kg (R$)"
+                        label="Preço por unidade (R$)"
                         fullWidth
                         type="number"
-                        value={pricePerKg}
-                        onChange={(e) => setPricePerKg(e.target.value)}
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
                         error={priceError}
                         helperText={priceError ? "Preço deve ser maior ou igual a 0" : ""}
                         InputProps={{

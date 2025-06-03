@@ -5,7 +5,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import SpaIcon from '@mui/icons-material/Spa';
 import logo from '../../../public/images/reciclar.png';
-import uniforlogo from '../../../public/images/logounifor.png';
 
 const Landing = () => {
     const navigate = useNavigate();

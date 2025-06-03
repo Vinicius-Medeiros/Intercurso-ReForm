@@ -6,10 +6,9 @@ import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react
 import { OptionsObject, useSnackbar } from 'notistack';
 import { closeIconStyles } from './constant';
 import { useNavigate } from 'react-router';
-import { CreateEmpresaModel } from '../../models/empresa';
 import { LoadingState } from '../../utils/enums';
 import { CnpjRequest, verifyCnpj } from '../../Services/receitaWS';
-import { EmpresaService } from '../../Services/empresa';
+import { authService, RegisterRequest } from '../../Services/auth';
 
 
 interface ReturnMsgToShowType {
@@ -65,6 +64,7 @@ export const RegisterPage = () => {
     const [uf, setUf] = useState<string>("")
     const [pass, setPass] = useState<string>("")
     const [pass2, setpass2] = useState<string>("")
+    const [description, setDescription] = useState<string>("Descrição sobre a empresa...")
 
 
     useEffect(() => {
@@ -136,30 +136,41 @@ export const RegisterPage = () => {
         if (pass != pass2)
             return enqueueSnackbar('senhas não coincidem', { variant: "error" })
 
-        const postData: CreateEmpresaModel = {
-            nome: name,
+        const postData: RegisterRequest = {
+            name: name,
+            cnpj: cnpj.replace(/\D/g, ''),
             email,
-            cnpj,
-            telefone,
-            logradouro,
-            numero,
-            complemento,
-            cep,
-            bairro,
-            municipio,
-            uf,
-            senha: pass
+            phone: telefone,
+            description: description,
+            password: pass,
+            role: "user",
+            addresses: [
+                {
+                    street: logradouro,
+                    city: municipio,
+                    state: uf,
+                    zipCode: cep,
+                    complement: complemento,
+                    neighborhood: bairro,
+                    number: numero,
+                    isMain: true,
+                }
+            ]
         }
         console.log('postData', postData)
 
         setFormeState(LoadingState.Loading)
 
-        EmpresaService.create(postData).then(() => {
+        try {
+            await authService.register(postData);
             enqueueSnackbar('Empresa cadastrada com sucesso!', { variant: "success" })
             navigate("/login")
-        }).catch( () => {
-            enqueueSnackbar('Error ao cadastrar empresa!', { variant: "error" })
-        }).finally(() => setFormeState(LoadingState.None))
+        } catch (error: any) {
+            const message = error.response?.data?.message || 'Error ao cadastrar empresa!';
+            enqueueSnackbar(message, { variant: "error" })
+        } finally {
+            setFormeState(LoadingState.None)
+        }
     }
 
     return (
@@ -211,7 +222,19 @@ export const RegisterPage = () => {
                     value={name}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                     sx={{
-                        width: "100%"
+                        width: "100%",
+                    }}
+                    required
+                />
+                <TextField
+                    id="description"
+                    label="Descrição"
+                    variant="outlined"
+                    type="text"
+                    value={description}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
+                    sx={{
+                        width: "100%",
                     }}
                     required
                 />
@@ -365,7 +388,7 @@ export const RegisterPage = () => {
                         sx={{
                             width: "9.5rem",
                         }}
-                        disabled = {formState == LoadingState.Loading}
+                        disabled={formState == LoadingState.Loading}
                     >
                         Criar Cadastro
                     </Button>

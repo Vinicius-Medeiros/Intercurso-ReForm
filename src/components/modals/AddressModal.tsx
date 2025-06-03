@@ -13,7 +13,7 @@ import { useSnackbar } from 'notistack';
 import { useState, useEffect } from 'react';
 
 interface Address {
-    id: number;
+    id?: string;
     street: string;
     number: string;
     complement?: string;
@@ -22,13 +22,15 @@ interface Address {
     state: string;
     zipCode: string;
     isMain: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 interface AddressModalProps {
     open: boolean;
     onClose: () => void;
     address: Address | null;
-    onSave: (address: Omit<Address, 'id' | 'isMain'>) => void;
+    onSave: (address: Omit<Address, 'id' | 'isMain' | 'createdAt' | 'updatedAt'>) => void;
 }
 
 interface ViaCepResponse {

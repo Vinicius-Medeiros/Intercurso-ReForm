@@ -41,6 +41,24 @@ export const CompanyInfo = ({ companyInfo, onEdit }: CompanyInfoProps) => {
         }));
     };
 
+    function formatPhoneNumber(phoneNumberString: string) {
+        // 1. Clean the input: Remove all non-digit characters
+        const cleanNumber = phoneNumberString.replace(/\D/g, '');
+
+        // 2. Apply the mask if the number has enough digits
+        //    Brazilian mobile numbers typically have 11 digits (2 for DDD + 9 for local number)
+        if (cleanNumber.length === 11) {
+            return `(${cleanNumber.substring(0, 2)}) ${cleanNumber.substring(2, 7)}-${cleanNumber.substring(7, 11)}`;
+        } else if (cleanNumber.length === 10) {
+            // Handle older 10-digit formats (DDD + 8-digit local number)
+            return `(${cleanNumber.substring(0, 2)}) ${cleanNumber.substring(2, 6)}-${cleanNumber.substring(6, 10)}`;
+        } else {
+            // Return the clean number if it doesn't match expected lengths,
+            // or handle as you prefer (e.g., return an error, an empty string)
+            return cleanNumber;
+        }
+    }
+
     return (
         <Paper sx={{ p: 3, mb: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -74,7 +92,10 @@ export const CompanyInfo = ({ companyInfo, onEdit }: CompanyInfoProps) => {
                     <TextField
                         fullWidth
                         label="CNPJ"
-                        value={isEditMode ? editedInfo.cnpj : companyInfo.cnpj}
+                        value={isEditMode ? editedInfo.cnpj : companyInfo.cnpj.replace(
+                            /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+                            '$1.$2.$3/$4-$5'
+                        )}
                         onChange={handleChange('cnpj')}
                         disabled={!isEditMode}
                         InputProps={{
@@ -103,7 +124,7 @@ export const CompanyInfo = ({ companyInfo, onEdit }: CompanyInfoProps) => {
                     <TextField
                         fullWidth
                         label="Telefone"
-                        value={isEditMode ? editedInfo.phone : companyInfo.phone}
+                        value={isEditMode ? editedInfo.phone : formatPhoneNumber(companyInfo.phone)}
                         onChange={handleChange('phone')}
                         disabled={!isEditMode}
                         InputProps={{

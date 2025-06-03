@@ -4,14 +4,11 @@ import { useSnackbar } from "notistack"
 import { ChangeEvent, FormEvent, MouseEvent, useRef, useState } from "react"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { useDispatch } from 'react-redux';
-import { Login } from "../../services/auth"
 import { login } from "../../store/slices/authSlice"
+import { authService } from "../../Services/auth"
 
 export const LoginPage = () => {
-    const {
-        enqueueSnackbar
-    } = useSnackbar()
-
+    const { enqueueSnackbar } = useSnackbar()
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
@@ -19,21 +16,22 @@ export const LoginPage = () => {
     const [email, setEmail] = useState<string>("")
     const PassInputRef = useRef<HTMLInputElement>(null)
     const LoginInputRef = useRef<HTMLInputElement>(null)
-    const [loginValue, setLoginValue] = useState<string>("")
+    const [cnpj, setCnpj] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const [showPassword, setShowPassword] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const disableButton: boolean = !loginValue || !password
+    const disableButton: boolean = !cnpj || !password || isLoading
 
     const handleLoginSubmit = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (loginValue && e.key === "Enter" && !password) {
+        if (cnpj && e.key === "Enter" && !password) {
             e.preventDefault()
             PassInputRef.current?.focus()
         }
     }
 
     const handlePassSubmit = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (password && e.key === "Enter" && !loginValue) {
+        if (password && e.key === "Enter" && !cnpj) {
             e.preventDefault()
             LoginInputRef.current?.focus()
         }
@@ -41,25 +39,40 @@ export const LoginPage = () => {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        Login({ cnpj: loginValue, senha: password }).then((res) => {            
-            dispatch(login({ user: res.data }));
+        setIsLoading(true)
 
-            enqueueSnackbar("Logado com sucesso!", { variant: "success" })
+        try {
+            const { company, token } = await authService.login({ 
+                cnpj: cnpj.replace(/\D/g, ''), // Remove non-digits
+                password 
+            });
             
+            dispatch(login({ user: company }));
+            enqueueSnackbar("Logado com sucesso!", { variant: "success" })
             navigate("/dashboard")
-        }).catch((_err) => {
-            enqueueSnackbar("Erro ao fazer login!", { variant: "error" })
-        })
+        } catch (error: any) {
+            const message = error.response?.data?.message || "Erro ao fazer login!";
+            enqueueSnackbar(message, { variant: "error" })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
-    const handleRecoverPassword = (event: FormEvent<HTMLDivElement>) => {
+    const handleRecoverPassword = async (event: FormEvent<HTMLDivElement>) => {
         event.preventDefault();
-
-        enqueueSnackbar("Email de recuperação enviado com sucesso!", { variant: "success" })
-
+        // TODO: Implement password recovery
+        enqueueSnackbar("Funcionalidade em desenvolvimento!", { variant: "info" })
         setModalOpen(false);
         setEmail("")
     }
+
+    const formatCNPJ = (value: string) => {
+        const numbers = value.replace(/\D/g, '');
+        if (numbers.length <= 14) {
+            return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+        }
+        return value;
+    };
 
     return (
         <>
@@ -77,19 +90,24 @@ export const LoginPage = () => {
             >
                 <TextField
                     inputRef={LoginInputRef}
-                    id="login"
-                    label="Login"
+                    id="cnpj"
+                    label="CNPJ"
                     variant="outlined"
                     type="text"
-                    value={loginValue}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setLoginValue(e.target.value)}
+                    value={cnpj}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCnpj(formatCNPJ(e.target.value))}
                     autoFocus
                     required
                     onKeyDown={handleLoginSubmit}
+                    inputProps={{
+                        maxLength: 18, // XX.XXX.XXX/XXXX-XX
+                        pattern: "[0-9.]*"
+                    }}
+                    helperText="Digite apenas números"
                 />
                 <TextField
                     inputRef={PassInputRef}
-                    id="pass"
+                    id="password"
                     label="Senha"
                     variant="outlined"
                     type={showPassword ? "text" : "password"}
@@ -130,7 +148,7 @@ export const LoginPage = () => {
                     fullWidth
                     size="large"
                 >
-                    Entrar
+                    {isLoading ? "Entrando..." : "Entrar"}
                 </Button>
                 <Typography
                     sx={{
@@ -159,17 +177,22 @@ export const LoginPage = () => {
                     sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}
                 >
                     <DialogContentText>
-                        Coloque seu endereço de email, enviaremos um link para a recuperação da sua senha
+                        Coloque seu CNPJ, enviaremos um link para a recuperação da sua senha
                     </DialogContentText>
                     <TextField
                         autoFocus
                         required
                         value={email}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                        id="email"
-                        label="Email"
-                        type="email"
+                        id="cnpj"
+                        label="CNPJ"
+                        type="text"
                         fullWidth
+                        inputProps={{
+                            maxLength: 18,
+                            pattern: "[0-9.]*"
+                        }}
+                        helperText="Digite apenas números"
                     />
                 </DialogContent>
                 <DialogActions sx={{ pb: 3, px: 3 }}>

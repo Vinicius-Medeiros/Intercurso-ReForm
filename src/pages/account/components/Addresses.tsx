@@ -20,7 +20,7 @@ import { useState } from 'react';
 import { ConfirmModal } from '../../../components/modals/ConfirmModal';
 
 interface Address {
-    id: number;
+    id?: string;
     street: string;
     number: string;
     complement?: string;
@@ -29,14 +29,16 @@ interface Address {
     state: string;
     zipCode: string;
     isMain: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 interface AddressesProps {
     addresses: Address[];
     onAddAddress: () => void;
     onEditAddress: (address: Address) => void;
-    onDeleteAddress: (addressId: number) => void;
-    onSetMainAddress: (addressId: number) => void;
+    onDeleteAddress: (addressId: string) => void;
+    onSetMainAddress: (addressId: string) => void;
 }
 
 export const Addresses = ({ 
@@ -47,9 +49,9 @@ export const Addresses = ({
     onSetMainAddress 
 }: AddressesProps) => {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [addressToDelete, setAddressToDelete] = useState<number | null>(null);
+    const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
 
-    const handleDeleteClick = (id: number) => {
+    const handleDeleteClick = (id: string) => {
         setAddressToDelete(id);
         setDeleteConfirmOpen(true);
     };
@@ -131,10 +133,10 @@ export const Addresses = ({
                                 secondary={`${address.neighborhood}, ${address.city} - ${address.state}, ${address.zipCode}`}
                             />
                             <ListItemSecondaryAction>
-                                {!address.isMain && (
+                                {!address.isMain && address.id && (
                                     <Button
                                         size="small"
-                                        onClick={() => onSetMainAddress(address.id)}
+                                        onClick={() => onSetMainAddress(address.id as string)}
                                         sx={{ mr: 1 }}
                                     >
                                         Definir como Principal
@@ -147,10 +149,10 @@ export const Addresses = ({
                                 >
                                     <Edit />
                                 </IconButton>
-                                {!address.isMain && (
+                                {!address.isMain && address.id && (
                                     <IconButton
                                         edge="end"
-                                        onClick={() => handleDeleteClick(address.id)}
+                                        onClick={() => handleDeleteClick(address.id as string)}
                                         color="error"
                                     >
                                         <Delete />

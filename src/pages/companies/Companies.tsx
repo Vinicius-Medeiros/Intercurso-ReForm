@@ -1,4 +1,4 @@
-import { Search, Visibility } from '@mui/icons-material';
+import { Search, Visibility, Business } from '@mui/icons-material';
 import {
     Box,
     IconButton,
@@ -13,20 +13,15 @@ import {
     TableRow,
     TextField,
     Tooltip,
-    Typography
+    Typography,
+    CircularProgress
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CompanyMaterialsModal } from '../../components/modals/CompanyMaterialsModal';
-import { Material } from '../../types/Material';
-
-interface Company {
-    id: number;
-    name: string;
-    cnpj: string;
-    email: string;
-    phone: string;
-    address: string;
-}
+import { CompanyDetailsModal } from '../../components/modals/CompanyDetailsModal';
+import { useSnackbar } from 'notistack';
+import { Company } from '../../Services/auth';
+import { companyService } from '../../Services/companyService';
 
 export const CompaniesPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,179 +29,59 @@ export const CompaniesPage = () => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedCompanyForDetails, setSelectedCompanyForDetails] = useState<Company | null>(null);
+    const [companies, setCompanies] = useState<Company[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const { enqueueSnackbar } = useSnackbar();
 
-    // Dados de exemplo - substituir por dados reais da API
-    const [companies, setCompanies] = useState<Company[]>([
-        {
-            id: 1,
-            name: 'Construtora ABC',
-            cnpj: '12.345.678/0001-90',
-            email: 'contato@construtoraabc.com.br',
-            phone: '(85) 3333-4444',
-            address: 'Rua das Construções, 123 - Fortaleza/CE'
-        },
-        {
-            id: 2,
-            name: 'Materiais XYZ',
-            cnpj: '98.765.432/0001-10',
-            email: 'vendas@materiaisxyz.com.br',
-            phone: '(85) 4444-5555',
-            address: 'Av. dos Materiais, 456 - Fortaleza/CE'
-        },
-        {
-            id: 3,
-            name: 'Construções 123',
-            cnpj: '45.678.901/0001-23',
-            email: 'contato@construcoes123.com.br',
-            phone: '(85) 5555-6666',
-            address: 'Rua das Obras, 789 - Fortaleza/CE'
-        },
-        {
-            id: 4,
-            name: 'Construções 456',
-            cnpj: '23.456.789/0001-45',
-            email: 'vendas@construcoes456.com.br',
-            phone: '(85) 6666-7777',
-            address: 'Av. das Construções, 321 - Fortaleza/CE'
-        },
-        {
-            id: 5,
-            name: 'Materiais 789',
-            cnpj: '34.567.890/0001-56',
-            email: 'contato@materiais789.com.br',
-            phone: '(85) 7777-8888',
-            address: 'Rua dos Materiais, 654 - Fortaleza/CE'
-        }
-    ]);
+    useEffect(() => {
+        const fetchCompanies = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const data = await companyService.getAllCompaniesExcludingAuthenticated();
+                setCompanies(data);
+            } catch (error) {
+                console.error("Failed to fetch companies:", error);
+                setError("Erro ao carregar empresas.");
+                enqueueSnackbar("Erro ao carregar empresas.", { variant: "error" });
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    // Dados de exemplo para materiais - substituir por dados reais da API
-    const [companyMaterials] = useState<Record<number, Material[]>>({
-        1: [
-            {
-                id: 1,
-                name: 'Cimento',
-                category: 'Construção',
-                quantity: 1000,
-                description: 'Cimento Portland CP-II-32',
-                pricePerKg: 0.45
-            },
-            {
-                id: 2,
-                name: 'Areia',
-                category: 'Construção',
-                quantity: 5000,
-                description: 'Areia média lavada',
-                pricePerKg: 0.15
-            }
-        ],
-        2: [
-            {
-                id: 3,
-                name: 'Tijolo',
-                category: 'Alvenaria',
-                quantity: 2000,
-                description: 'Tijolo cerâmico 9x19x19',
-                pricePerKg: 0.80
-            }
-        ],
-        3: [
-            {
-                id: 1,
-                name: 'Areia',
-                category: 'Construção',
-                quantity: 5000,
-                description: 'Areia média lavada',
-                pricePerKg: 0.15
-            },
-            {
-                id: 2,
-                name: 'Tijolo',
-                category: 'Alvenaria',
-                quantity: 2000,
-                description: 'Tijolo cerâmico 9x19x19',
-                pricePerKg: 0.80
-            },
-            {
-                id: 3,
-                name: 'Cimento',
-                category: 'Construção',
-                quantity: 1000,
-                description: 'Cimento Portland CP-II-32',
-                pricePerKg: 0.45
-            },
-            {
-                id: 4,
-                name: 'Plástico',
-                category: 'Reciclagem',
-                quantity: 21000,
-                description: 'Garrafa Pet',
-                pricePerKg: 0.05
-            },
-            {
-                id: 5,
-                name: 'Metal',
-                category: 'Reciclagem',
-                quantity: 76,
-                description: 'Latinhas',
-                pricePerKg: 0.10
-            },
-            {
-                id: 6,
-                name: 'Metal',
-                category: 'Reciclagem',
-                quantity: 76,
-                description: 'Latinhas',
-                pricePerKg: 0.10
-            },
-            {
-                id: 7,
-                name: 'Metal',
-                category: 'Reciclagem',
-                quantity: 76,
-                description: 'Latinhas',
-                pricePerKg: 0.10
-            },
-            {
-                id: 8,
-                name: 'Metal',
-                category: 'Reciclagem',
-                quantity: 76,
-                description: 'Latinhas',
-                pricePerKg: 0.10
-            }
-        ]
-    });
+        fetchCompanies();
+    }, [enqueueSnackbar]);
 
     const filteredCompanies = companies.filter(company => {
         const searchTermLower = searchTerm.toLowerCase().trim();
-        const formattedCnpj = company.cnpj;
-        const unformattedCnpj = company.cnpj.replace(/\D/g, '');
-        const formattedPhone = company.phone;
-        const unformattedPhone = company.phone.replace(/\D/g, '');
+
+        const mainAddress = company.addresses?.find(addr => addr.isMain) || company.addresses?.[0];
+        const addressText = mainAddress
+            ? `${mainAddress.street}, ${mainAddress.number}${mainAddress.complement ? ' - ' + mainAddress.complement : ''} - ${mainAddress.city}/${mainAddress.state}`
+            : '';
+
         const companyNameLower = company.name.toLowerCase().trim();
         const emailLower = company.email.toLowerCase().trim();
-        const addressLower = company.address.toLowerCase().trim();
+        const cnpjDigitsOnly = company.cnpj.replace(/\D/g, '');
+        const phoneDigitsOnly = company.phone.replace(/\D/g, '');
+        const addressLower = addressText.toLowerCase().trim();
 
-        // Extrai os dígitos do termo de pesquisa uma vez
         const searchTermDigitsOnly = searchTerm.replace(/\D/g, '');
 
         const matchesName = companyNameLower.includes(searchTermLower);
         const matchesEmail = emailLower.includes(searchTermLower);
         const matchesAddress = addressLower.includes(searchTermLower);
         const matchesCnpj =
-            formattedCnpj.includes(searchTerm) ||
-            (searchTermDigitsOnly !== '' && unformattedCnpj.includes(searchTermDigitsOnly));
+            company.cnpj.includes(searchTerm) ||
+            (searchTermDigitsOnly !== '' && cnpjDigitsOnly.includes(searchTermDigitsOnly));
         const matchesPhone =
-            formattedPhone.includes(searchTerm) ||
-            (searchTermDigitsOnly !== '' && unformattedPhone.includes(searchTermDigitsOnly));
+            company.phone.includes(searchTerm) ||
+            (searchTermDigitsOnly !== '' && phoneDigitsOnly.includes(searchTermDigitsOnly));
 
-        // Verifica se algum material da empresa corresponde ao termo de busca
-        const materials: Material[] = companyMaterials[company.id] || [];
-        const matchesMaterial = materials.some((material: Material) =>
-            material.name.toLowerCase().includes(searchTermLower) ||
-            material.category.toLowerCase().includes(searchTermLower) ||
-            material.description.toLowerCase().includes(searchTermLower)
-        );
+        const matchesMaterial = false;
 
         return matchesName || matchesEmail || matchesAddress || matchesCnpj || matchesPhone || matchesMaterial;
     });
@@ -230,14 +105,14 @@ export const CompaniesPage = () => {
         setSelectedCompany(null);
     };
 
-    const handlePurchase = (materialId: number, quantity: number, totalValue: number) => {
-        // TODO: Implementar a lógica de compra
-        console.log('Compra realizada:', {
-            companyId: selectedCompany?.id,
-            materialId,
-            quantity,
-            totalValue
-        });
+    const handleViewDetails = (company: Company) => {
+        setSelectedCompanyForDetails(company);
+        setIsDetailsModalOpen(true);
+    };
+
+    const handleCloseDetailsModal = () => {
+        setIsDetailsModalOpen(false);
+        setSelectedCompanyForDetails(null);
     };
 
     const paginatedCompanies = filteredCompanies.slice(
@@ -273,124 +148,163 @@ export const CompaniesPage = () => {
                 />
             </Box>
 
-            <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                <TableContainer 
-                    sx={(theme) => ({ 
-                        maxHeight: 'calc(100vh - 300px)',
-                        scrollbarColor: `${theme.palette.secondary.light} transparent`,
-                        scrollbarWidth: 'thin',
-                        '&::-webkit-scrollbar': {
-                            width: '8px',
-                            background: 'transparent',
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                            borderRadius: '4px',
-                            backgroundColor: 'rgba(0,0,0,.9)',
-                            '&:hover': {
-                                backgroundColor: 'rgba(0,0,0,.9)',
+            {isLoading ? (
+                <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                    <CircularProgress />
+                </Box>
+            ) : error ? (
+                <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                    <Typography color="error">{error}</Typography>
+                </Box>
+            ) : (
+                <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                    <TableContainer
+                        sx={(theme) => ({
+                            maxHeight: 'calc(100vh - 300px)',
+                            scrollbarColor: `${theme.palette.secondary.light} transparent`,
+                            scrollbarWidth: 'thin',
+                            '&::-webkit-scrollbar': {
+                                width: '8px',
+                                background: 'transparent',
                             },
-                        },
-                    })}
-                >
-                    <Table stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '25%' }}>Empresa</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '15%' }}>CNPJ</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '20%' }}>Email</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '15%' }}>Telefone</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '20%' }}>Endereço</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '5%' }}>Ações</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {paginatedCompanies.map((company) => (
-                                <TableRow
-                                    key={company.id}
-                                    sx={{
-                                        '&:hover': {
-                                            bgcolor: 'action.hover',
-                                        },
-                                    }}
-                                >
-                                    <TableCell sx={{
-                                        maxWidth: 0,
-                                        whiteSpace: 'normal',
-                                        wordWrap: 'break-word'
-                                    }}>
-                                        {company.name}
-                                    </TableCell>
-                                    <TableCell sx={{
-                                        maxWidth: 0,
-                                        whiteSpace: 'normal',
-                                        wordWrap: 'break-word'
-                                    }}>
-                                        {company.cnpj}
-                                    </TableCell>
-                                    <TableCell sx={{
-                                        maxWidth: 0,
-                                        whiteSpace: 'normal',
-                                        wordWrap: 'break-word'
-                                    }}>
-                                        {company.email}
-                                    </TableCell>
-                                    <TableCell sx={{
-                                        maxWidth: 0,
-                                        whiteSpace: 'normal',
-                                        wordWrap: 'break-word'
-                                    }}>
-                                        {company.phone}
-                                    </TableCell>
-                                    <TableCell sx={{
-                                        maxWidth: 0,
-                                        whiteSpace: 'normal',
-                                        wordWrap: 'break-word'
-                                    }}>
-                                        {company.address}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Tooltip title="Visualizar Materiais">
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => handleViewMaterials(company)}
-                                                sx={{ color: 'info.main' }}
-                                            >
-                                                <Visibility fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            {filteredCompanies.length === 0 && (
+                            '&::-webkit-scrollbar-thumb': {
+                                borderRadius: '4px',
+                                backgroundColor: 'rgba(0,0,0,.9)',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(0,0,0,.9)',
+                                },
+                            },
+                        })}
+                    >
+                        <Table stickyHeader>
+                            <TableHead>
                                 <TableRow>
-                                    <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                                        Nenhuma empresa encontrada
-                                    </TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '25%' }}>Empresa</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '15%' }}>CNPJ</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '20%' }}>Email</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '15%' }}>Telefone</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '20%' }}>Endereço</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '5%' }}>Ações</TableCell>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                    component="div"
-                    count={filteredCompanies.length}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[5, 10, 25]}
-                    labelRowsPerPage="Empresas por página:"
-                    labelDisplayedRows={({ from, to, count }) => `Página: ${from} / ${to} de ${count}`}
-                />
-            </Paper>
+                            </TableHead>
+                            <TableBody>
+                                {paginatedCompanies.map((company) => {
+                                    const mainAddress = company.addresses?.find(addr => addr.isMain) || company.addresses?.[0];
+                                    const addressText = mainAddress
+                                        ? `${mainAddress.street}, ${mainAddress.number}${mainAddress.complement ? ' - ' + mainAddress.complement : ''} - ${mainAddress.city}/${mainAddress.state}`
+                                        : 'N/A';
+
+                                    return (
+                                        <TableRow
+                                            key={company.id}
+                                            sx={{
+                                                '&:hover': {
+                                                    bgcolor: 'action.hover',
+                                                },
+                                            }}
+                                        >
+                                            <TableCell sx={{
+                                                maxWidth: 0,
+                                                whiteSpace: 'normal',
+                                                wordWrap: 'break-word'
+                                            }}>
+                                                {company.name}
+                                            </TableCell>
+                                            <TableCell sx={{
+                                                maxWidth: 0,
+                                                whiteSpace: 'normal',
+                                                wordWrap: 'break-word'
+                                            }}>
+                                                {company.cnpj.replace(
+                                                    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+                                                    '$1.$2.$3/$4-$5'
+                                                )}
+                                            </TableCell>
+                                            <TableCell sx={{
+                                                maxWidth: 0,
+                                                whiteSpace: 'normal',
+                                                wordWrap: 'break-word'
+                                            }}>
+                                                {company.email}
+                                            </TableCell>
+                                            <TableCell sx={{
+                                                maxWidth: 0,
+                                                whiteSpace: 'normal',
+                                                wordWrap: 'break-word'
+                                            }}>
+                                                {company.phone}
+                                            </TableCell>
+                                            <TableCell sx={{
+                                                maxWidth: 0,
+                                                whiteSpace: 'normal',
+                                                wordWrap: 'break-word'
+                                            }}>
+                                                {addressText}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                                    <Tooltip title="Visualizar Detalhes">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleViewDetails(company)}
+                                                            sx={{ color: 'primary.main' }}
+                                                        >
+                                                            <Business fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title="Visualizar Materiais">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleViewMaterials(company)}
+                                                            sx={{ color: 'info.main' }}
+                                                        >
+                                                            <Visibility fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                                {filteredCompanies.length === 0 && !isLoading && !error && (
+                                    <TableRow>
+                                        <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                                            Nenhuma empresa encontrada
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        component="div"
+                        count={filteredCompanies.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        labelRowsPerPage="Empresas por página:"
+                        labelDisplayedRows={({ from, to, count }) => `Página: ${from} / ${to} de ${count}`}
+                    />
+                </Paper>
+            )}
 
             {selectedCompany && (
                 <CompanyMaterialsModal
                     open={isModalOpen}
                     onClose={handleCloseModal}
                     companyName={selectedCompany.name}
-                    materials={companyMaterials[selectedCompany.id] || []}
-                    onPurchase={handlePurchase}
+                    companyId={selectedCompany.id}
+                    materials={selectedCompany.materials || []}
+                />
+            )}
+
+            {selectedCompanyForDetails && (
+                <CompanyDetailsModal
+                    open={isDetailsModalOpen}
+                    onClose={handleCloseDetailsModal}
+                    company={selectedCompanyForDetails}
                 />
             )}
         </Box>

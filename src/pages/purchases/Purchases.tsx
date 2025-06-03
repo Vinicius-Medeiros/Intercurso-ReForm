@@ -1,4 +1,4 @@
-import { Delete, Edit, MoreVert, Search, Visibility } from '@mui/icons-material';
+import { Delete, Edit, MoreVert, Search, Visibility, Warning } from '@mui/icons-material';
 import {
     Box,
     FormControl,
@@ -17,27 +17,19 @@ import {
     TablePagination,
     TableRow,
     TextField,
+    Tooltip,
     Typography
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { ptBR } from 'date-fns/locale';
-import { useState } from 'react';
-import { ContractState } from '../../enums/ContractState';
+import { useEffect, useState } from 'react';
 import { EditPurchaseModal } from '../../components/modals/EditPurchaseModal';
 import { CancelPurchaseModal } from '../../components/modals/CancelPurchaseModal';
-
-export interface Purchase {
-    id: number;
-    companyName: string;
-    cnpj: string;
-    material: string;
-    quantity: number;
-    value: number;
-    status: ContractState;
-    date: string;
-}
+import { openContractInNewTab } from '../../components/contracts/ContractViewer';
+import { purchaseService, Purchase, PurchaseStatus } from '../../Services/purchaseService';
+import { useSnackbar } from 'notistack';
 
 export const PurchasesPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -47,131 +39,54 @@ export const PurchasesPage = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(null);
+    const [selectedPurchaseId, setSelectedPurchaseId] = useState<string | null>(null);
     const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [purchaseToCancel, setPurchaseToCancel] = useState<Purchase | null>(null);
 
-    // Dados de exemplo - substituir por dados reais da API
-    const [purchases, setPurchases] = useState<Purchase[]>([
-        {
-            id: 1,
-            companyName: 'Construtora ABC',
-            cnpj: '12.345.678/0001-90',
-            material: 'Areia',
-            quantity: 1000,
-            value: 150.00,
-            status: ContractState.PENDING,
-            date: '2025-03-15'
-        },
-        {
-            id: 2,
-            companyName: 'Materiais XYZ',
-            cnpj: '98.765.432/0001-10',
-            material: 'Cimento',
-            quantity: 500,
-            value: 225.00,
-            status: ContractState.ACCEPTED,
-            date: '2025-03-14'
-        },
-        {
-            id: 3,
-            companyName: 'Construções 123',
-            cnpj: '45.678.901/0001-23',
-            material: 'Brita',
-            quantity: 750,
-            value: 187.50,
-            status: ContractState.COMPLETED,
-            date: '2025-03-13'
-        },
-        {
-            id: 4,
-            companyName: 'Construções 456',
-            cnpj: '23.456.789/0001-45',
-            material: 'Pedra',
-            quantity: 1200,
-            value: 360.00,
-            status: ContractState.REJECTED,
-            date: '2025-03-12'
-        },
-        {
-            id: 5,
-            companyName: 'Materiais 789',
-            cnpj: '34.567.890/0001-56',
-            material: 'Tijolo',
-            quantity: 2000,
-            value: 1600.00,
-            status: ContractState.CANCELLED,
-            date: '2025-03-11'
-        },
-        {
-            id: 6,
-            companyName: 'Construções Delta',
-            cnpj: '56.789.012/0001-78',
-            material: 'Argamassa',
-            quantity: 800,
-            value: 320.00,
-            status: ContractState.PENDING,
-            date: '2025-03-10'
-        },
-        {
-            id: 7,
-            companyName: 'Materiais Omega',
-            cnpj: '67.890.123/0001-89',
-            material: 'Cal',
-            quantity: 600,
-            value: 180.00,
-            status: ContractState.ACCEPTED,
-            date: '2025-03-09'
-        },
-        {
-            id: 8,
-            companyName: 'Construções Sigma',
-            cnpj: '78.901.234/0001-90',
-            material: 'Aço',
-            quantity: 1500,
-            value: 4500.00,
-            status: ContractState.COMPLETED,
-            date: '2025-03-08'
-        },
-        {
-            id: 9,
-            companyName: 'Materiais Beta',
-            cnpj: '89.012.345/0001-01',
-            material: 'Tinta',
-            quantity: 300,
-            value: 900.00,
-            status: ContractState.REJECTED,
-            date: '2025-03-07'
-        },
-        {
-            id: 10,
-            companyName: 'Construções Gama',
-            cnpj: '90.123.456/0001-12',
-            material: 'Vidro',
-            quantity: 400,
-            value: 1200.00,
-            status: ContractState.CANCELLED,
-            date: '2025-03-06'
-        },
-    ]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const { enqueueSnackbar } = useSnackbar();
+
+    const [purchases, setPurchases] = useState<Purchase[]>([]);
+
+    const fetchPurchases = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const data = await purchaseService.getCompanyPurchases('buyer');
+            setPurchases(data);
+        } catch (error) {
+            console.error("Failed to fetch purchases:", error);
+            setError("Erro ao carregar compras.");
+            enqueueSnackbar("Erro ao carregar compras.", { variant: "error" });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPurchases();
+    }, [enqueueSnackbar]);
 
     const filteredPurchases = purchases.filter(purchase => {
-        const searchTermLower = searchTerm.toLowerCase();
-        const formattedCnpj = purchase.cnpj;
-        const unformattedCnpj = purchase.cnpj.replace(/\D/g, '');
-        const purchaseDate = new Date(purchase.date);
+        const searchTermLower = searchTerm.toLowerCase().trim();
+        const companyNameLower = purchase.seller.name.toLowerCase().trim();
+        const cnpjDigitsOnly = purchase.seller.cnpj.replace(/\D/g, '');
+        const materialLower = purchase.material.name.toLowerCase().trim();
+        const purchaseDate = new Date(purchase.createdAt);
 
         const startDateNoTime = startDate ? new Date(startDate.setHours(0, 0, 0, 0)) : null;
         const endDateNoTime = endDate ? new Date(endDate.setHours(23, 59, 59, 999)) : null;
         const purchaseDateNoTime = new Date(purchaseDate.setHours(0, 0, 0, 0));
 
         const matchesSearch = (
-            purchase.companyName.toLowerCase().includes(searchTermLower) ||
-            purchase.material.toLowerCase().includes(searchTermLower) ||
-            formattedCnpj.includes(searchTerm) ||
-            unformattedCnpj.includes(searchTerm.replace(/\D/g, ''))
+            companyNameLower.includes(searchTermLower) ||
+            materialLower.includes(searchTermLower) ||
+            purchase.seller.cnpj.includes(searchTerm) ||
+            (searchTerm.replace(/\D/g, '') !== '' && cnpjDigitsOnly.includes(searchTerm.replace(/\D/g, '')))
         );
 
         const matchesStatus = statusFilter === 'todos' || purchase.status === statusFilter;
@@ -182,25 +97,38 @@ export const PurchasesPage = () => {
         return matchesSearch && matchesStatus && matchesDate;
     });
 
-    const getStatusColor = (status: ContractState) => {
+    const getStatusColor = (status: PurchaseStatus) => {
         switch (status) {
-            case ContractState.PENDING:
+            case PurchaseStatus.PENDING:
                 return '#FFA726'; // Laranja
-            case ContractState.ACCEPTED:
+            case PurchaseStatus.APPROVED:
                 return '#66BB6A'; // Verde
-            case ContractState.COMPLETED:
+            case PurchaseStatus.COMPLETED:
                 return '#42A5F5'; // Azul
-            case ContractState.REJECTED:
+            case PurchaseStatus.DENIED:
                 return '#EF5350'; // Vermelho
-            case ContractState.CANCELLED:
+            case PurchaseStatus.CANCELLED:
                 return '#757575'; // Cinza
             default:
                 return '#757575';
         }
     };
 
-    const getStatusLabel = (status: ContractState) => {
-        return status;
+    const getStatusLabel = (status: PurchaseStatus) => {
+        switch (status) {
+            case PurchaseStatus.PENDING:
+                return 'PENDENTE'; // Laranja
+            case PurchaseStatus.APPROVED:
+                return 'APROVADA'; // Verde
+            case PurchaseStatus.COMPLETED:
+                return 'CONCLUÍDA'; // Azul
+            case PurchaseStatus.DENIED:
+                return 'NEGADA'; // Vermelho
+            case PurchaseStatus.CANCELLED:
+                return 'CANCELADA'; // Cinza
+            default:
+                return 'DESCONHECIDO';
+        }
     };
 
     const handleChangePage = (_event: unknown, newPage: number) => {
@@ -217,7 +145,7 @@ export const PurchasesPage = () => {
         page * rowsPerPage + rowsPerPage
     );
 
-    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, purchaseId: number) => {
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, purchaseId: string) => {
         setAnchorEl(event.currentTarget);
         setSelectedPurchaseId(purchaseId);
     };
@@ -227,7 +155,7 @@ export const PurchasesPage = () => {
         setSelectedPurchaseId(null);
     };
 
-    const handleEdit = (id: number) => {
+    const handleEdit = (id: string) => {
         handleMenuClose();
         const purchase = purchases.find(p => p.id === id);
         if (purchase) {
@@ -236,7 +164,7 @@ export const PurchasesPage = () => {
         }
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         handleMenuClose();
         const purchase = purchases.find(p => p.id === id);
         if (purchase) {
@@ -245,33 +173,54 @@ export const PurchasesPage = () => {
         }
     };
 
-    const handleViewContract = (id: number) => {
+    const handleViewContract = async (id: string) => {
         handleMenuClose();
-        console.log('Visualizar contrato:', id);
+        const purchase = purchases.find(p => p.id === id);
+        if (purchase) {
+            await openContractInNewTab({
+                type: 'purchase',
+                purchase: purchase
+            });
+        }
     };
 
-    const isCancelDisabled = (status: ContractState) => {
-        return status === ContractState.COMPLETED ||
-            status === ContractState.REJECTED ||
-            status === ContractState.CANCELLED;
+    const isCancelDisabled = (status: PurchaseStatus) => {
+        return status === PurchaseStatus.COMPLETED ||
+            status === PurchaseStatus.DENIED ||
+            status === PurchaseStatus.CANCELLED;
     };
 
-    const handleUpdatePurchase = (id: number, quantity: number, value: number) => {
-        setPurchases(purchases.map(purchase => 
-            purchase.id === id 
-                ? { ...purchase, quantity, value }
-                : purchase
-        ));
+    const handleUpdatePurchase = async (id: string, quantity: number, totalValue: number) => {
+        try {
+            // Call the backend API to update the purchase
+            await purchaseService.updatePurchase(id, { quantity: Number(quantity), totalValue });
+            enqueueSnackbar('Compra atualizada com sucesso!', { variant: 'success' });
+            // Refetch purchases to update the list
+            fetchPurchases();
+        } catch (error) {
+            console.error("Failed to update purchase:", error);
+            enqueueSnackbar('Erro ao atualizar compra.', { variant: 'error' });
+        }
     };
 
-    const handleConfirmCancel = (id: number) => {
-        setPurchases(purchases.map(purchase => 
-            purchase.id === id 
-                ? { ...purchase, status: ContractState.CANCELLED }
-                : purchase
-        ));
-        setIsCancelModalOpen(false);
-        setPurchaseToCancel(null);
+    const handleConfirmCancel = async (id: string) => {
+        try {
+            // Call the backend API to cancel the purchase
+            await purchaseService.cancelPurchase(id);
+            enqueueSnackbar('Compra cancelada com sucesso!', { variant: 'success' });
+            // Refetch purchases to update the list
+            fetchPurchases();
+        } catch (error) {
+            console.error("Failed to cancel purchase:", error);
+            enqueueSnackbar('Erro ao cancelar compra.', { variant: 'error' });
+        }
+    };
+
+    const isPriceDifferent = (purchase: Purchase) => {
+        if (purchase.quantity > 0 && purchase.unitPrice !== undefined) {
+            return purchase.totalValue != purchase.quantity * purchase.unitPrice;
+        }
+        return false;
     };
 
     return (
@@ -312,11 +261,11 @@ export const PurchasesPage = () => {
                         }}
                     >
                         <MenuItem value="todos">Todos</MenuItem>
-                        <MenuItem value={ContractState.PENDING}>Pendente</MenuItem>
-                        <MenuItem value={ContractState.ACCEPTED}>Aprovado</MenuItem>
-                        <MenuItem value={ContractState.COMPLETED}>Concluído</MenuItem>
-                        <MenuItem value={ContractState.REJECTED}>Negado</MenuItem>
-                        <MenuItem value={ContractState.CANCELLED}>Cancelado</MenuItem>
+                        <MenuItem value={PurchaseStatus.PENDING}>Pendente</MenuItem>
+                        <MenuItem value={PurchaseStatus.APPROVED}>Aprovado</MenuItem>
+                        <MenuItem value={PurchaseStatus.COMPLETED}>Concluído</MenuItem>
+                        <MenuItem value={PurchaseStatus.DENIED}>Negado</MenuItem>
+                        <MenuItem value={PurchaseStatus.CANCELLED}>Cancelado</MenuItem>
                     </Select>
                 </FormControl>
                 <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
@@ -398,35 +347,45 @@ export const PurchasesPage = () => {
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
-                                        {purchase.companyName}
+                                        {purchase.seller.name}
                                     </TableCell>
                                     <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
-                                        {purchase.cnpj}
+                                        {purchase.seller.cnpj.replace(
+                                            /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+                                            '$1.$2.$3/$4-$5'
+                                        )}
                                     </TableCell>
                                     <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
-                                        {purchase.material}
+                                        {purchase.material.name}
                                     </TableCell>
                                     <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
-                                        {purchase.quantity.toLocaleString('pt-BR')} kg
+                                        {Number(purchase.quantity).toLocaleString('pt-BR')} {purchase.material.unit}
                                     </TableCell>
                                     <TableCell sx={{
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
-                                        {purchase.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 'regular' }}>
+                                            {Number(purchase.totalValue).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                            {isPriceDifferent(purchase) && (
+                                                <Tooltip title="Valor diferente do estabelecido por kg">
+                                                    <Warning sx={{ color: 'warning.main' }} />
+                                                </Tooltip>
+                                            )}
+                                        </Box>
                                     </TableCell>
                                     <TableCell>
                                         <Box
@@ -445,7 +404,7 @@ export const PurchasesPage = () => {
                                         </Box>
                                     </TableCell>
                                     <TableCell>
-                                        {new Date(purchase.date).toLocaleDateString('pt-BR')}
+                                        {new Date(purchase.createdAt).toLocaleDateString('pt-BR')}
                                     </TableCell>
                                     <TableCell>
                                         <IconButton
@@ -504,8 +463,8 @@ export const PurchasesPage = () => {
                                         >
                                             <MenuItem
                                                 onClick={() => handleEdit(purchase.id)}
-                                                disabled={isCancelDisabled(purchase.status)}
-                                             >
+                                                disabled={isCancelDisabled(purchase.status) || purchase.status === PurchaseStatus.APPROVED}
+                                            >
                                                 <Edit fontSize="small" sx={{ mr: 1 }} />
                                                 Editar
                                             </MenuItem>

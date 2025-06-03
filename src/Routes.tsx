@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { LoginPage } from "./pages/login/login";
 import { RegisterPage } from "./pages/register/Register";
 import { IslandLayout } from "./layout/IslandLayout";
 import Landing from "./pages/landing/Landing";
@@ -14,6 +13,7 @@ import { SalesPage } from "./pages/sales/Sales";
 import { InitAuth } from "./components/InitAuth";
 import { DashboardLayout } from "./layout/DashboardLayout";
 import { CompaniesPage } from "./pages/companies/Companies";
+import { LoginPage } from "./pages/login/login";
 
 const MainLayout = () => {
     return (

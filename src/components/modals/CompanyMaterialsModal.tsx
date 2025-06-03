@@ -19,18 +19,21 @@ import {
     Button,
     Box,
     Tooltip,
-    styled
+    styled,
+    CircularProgress
 } from '@mui/material';
-import { Material } from '../../types/Material';
+import { Material } from '../../Services/materialService';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { purchaseService } from '../../Services/purchaseService';
+import { useSnackbar } from 'notistack';
 
 interface CompanyMaterialsModalProps {
     open: boolean;
     onClose: () => void;
     companyName: string;
+    companyId: string;
     materials: Material[];
-    onPurchase: (materialId: number, quantity: number, totalValue: number) => void;
 }
 
 const StyledAccordion = styled(Accordion)(({ theme }) => ({
@@ -40,11 +43,13 @@ const StyledAccordion = styled(Accordion)(({ theme }) => ({
     },
 }));
 
-export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, onPurchase }: CompanyMaterialsModalProps) => {
+export const CompanyMaterialsModal = ({ open, onClose, companyName, companyId, materials }: CompanyMaterialsModalProps) => {
     const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
     const [quantity, setQuantity] = useState<string>('');
     const [totalValue, setTotalValue] = useState<string>('');
     const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     const handlePurchaseClick = (material: Material) => {
         if (selectedMaterial?.id === material.id) {
@@ -62,8 +67,8 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
 
     const handleQuantityChange = (newQuantity: string) => {
         setQuantity(newQuantity);
-        if (selectedMaterial && newQuantity) {
-            const calculatedValue = Number(newQuantity) * selectedMaterial.pricePerKg;
+        if (selectedMaterial && newQuantity && selectedMaterial.price !== undefined) {
+            const calculatedValue = Number(newQuantity) * selectedMaterial.price;
             setTotalValue(calculatedValue.toFixed(2));
         } else {
             setQuantity('');
@@ -80,13 +85,32 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
         }
     };
 
-    const handlePurchase = () => {
-        if (selectedMaterial && quantity && totalValue) {
-            onPurchase(selectedMaterial.id, Number(quantity), Number(totalValue));
+    const handlePurchase = async () => {
+        if (!selectedMaterial || !quantity || !totalValue) return;
+
+        setIsSubmitting(true);
+        try {
+            await purchaseService.createPurchase({
+                sellerId: companyId,
+                materialId: selectedMaterial.id,
+                quantity: Number(quantity),
+                unitPrice: Number(selectedMaterial.price)
+            });
+
+            enqueueSnackbar("Proposta de compra enviada com sucesso!", { variant: "success" });
             setSelectedMaterial(null);
             setQuantity('');
             setTotalValue('');
             setIsAccordionExpanded(false);
+            onClose();
+        } catch (error: any) {
+            console.error("Failed to create purchase:", error);
+            enqueueSnackbar(
+                error.response?.data?.message || "Erro ao enviar proposta de compra.",
+                { variant: "error" }
+            );
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -137,19 +161,19 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
                 sx={(theme) => ({ 
                     p: 3,
                     maxHeight: 'min(calc(100vh - 40px), 499.8px)',
-                        scrollbarColor: `${theme.palette.primary.dark} transparent`,
-                        scrollbarWidth: 'thin',
-                        '&::-webkit-scrollbar': {
-                            width: '8px',
-                            background: 'transparent',
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                            borderRadius: '4px',
+                    scrollbarColor: `${theme.palette.primary.dark} transparent`,
+                    scrollbarWidth: 'thin',
+                    '&::-webkit-scrollbar': {
+                        width: '8px',
+                        background: 'transparent',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        borderRadius: '4px',
+                        backgroundColor: 'rgba(0,0,0,.9)',
+                        '&:hover': {
                             backgroundColor: 'rgba(0,0,0,.9)',
-                            '&:hover': {
-                                backgroundColor: 'rgba(0,0,0,.9)',
-                            },
                         },
+                    },
                 })}
             >
                 <TableContainer
@@ -178,7 +202,7 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
                                 <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '15%' }}>Categoria</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '25%' }}>Descrição</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '15%' }}>Quantidade</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '15%' }}>Preço por kg</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '15%' }}>Preço por unidade</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', bgcolor: 'background.paper', width: '5%' }}>Ação</TableCell>
                             </TableRow>
                         </TableHead>
@@ -218,14 +242,14 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
-                                        {material.quantity.toLocaleString('pt-BR')} kg
+                                        {Number(material.quantity).toLocaleString('pt-BR')} {material.unit}
                                     </TableCell>
                                     <TableCell sx={{ 
                                         maxWidth: 0,
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
-                                        {material.pricePerKg.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        {Number(material.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {material.unit}
                                     </TableCell>
                                     <TableCell>
                                         <Tooltip title="Comprar">
@@ -295,7 +319,7 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
                                 />
                                 <Box sx={{ display: 'flex', gap: 2 }}>
                                     <TextField
-                                        label="Quantidade (kg)"
+                                        label={`Quantidade (${selectedMaterial.unit})`}
                                         type="number"
                                         value={quantity}
                                         onChange={(e) => handleQuantityChange(e.target.value)}
@@ -316,23 +340,33 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, materials, o
                                     />
                                 </Box>
                                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-                                    <Button variant="outlined" onClick={() => {
-                                        setSelectedMaterial(null);
-                                        setQuantity('');
-                                        setTotalValue('');
-                                        setIsAccordionExpanded(false);
-                                    }}>
+                                    <Button 
+                                        variant="outlined" 
+                                        onClick={() => {
+                                            setSelectedMaterial(null);
+                                            setQuantity('');
+                                            setTotalValue('');
+                                            setIsAccordionExpanded(false);
+                                        }}
+                                        disabled={isSubmitting}
+                                    >
                                         Voltar
                                     </Button>
                                     <Button 
                                         variant="contained" 
                                         color="secondary"
                                         onClick={handlePurchase}
-                                        disabled={!quantity || !totalValue}
+                                        disabled={
+                                            isSubmitting || 
+                                            !quantity || 
+                                            !totalValue || 
+                                            Number(quantity) <= 0 || 
+                                            Number(totalValue) <= 0
+                                        }
+                                        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
                                     >
-                                        Comprar
+                                        {isSubmitting ? "Enviando..." : "Enviar Proposta"}
                                     </Button>
-
                                 </Box>
                             </Box>
                         </AccordionDetails>

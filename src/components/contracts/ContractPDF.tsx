@@ -130,7 +130,6 @@ const getStatusColor = (status: PurchaseStatus | SaleStatus) => {
         case SaleStatus.COMPLETED:
             return '#42A5F5'; // Azul
         case PurchaseStatus.DENIED:
-        case SaleStatus.REJECTED: // Use REJECTED for sales
             return '#EF5350'; // Vermelho
         case PurchaseStatus.CANCELLED:
         case SaleStatus.CANCELLED:
@@ -153,8 +152,6 @@ const getStatusLabel = (status: PurchaseStatus | SaleStatus) => {
             return 'CONCLUÍDO';
         case PurchaseStatus.DENIED:
             return 'NEGADO'; // Use DENIED for purchases
-        case SaleStatus.REJECTED:
-            return 'NEGADO'; // Use NEGADO for sales (mapping REJECTED)
         case PurchaseStatus.CANCELLED:
         case SaleStatus.CANCELLED:
             return 'CANCELADO';
@@ -298,10 +295,10 @@ export const generateContractPDF = async (data: ContractPDFData) => {
                         <Text style={styles.value}>{data.purchase.status === PurchaseStatus.DENIED ? data.purchase.denialReason : data.purchase.cancellationReason}</Text>
                     </View>
                 )}
-                {data.type === 'sale' && (data.sale.status === SaleStatus.REJECTED || data.sale.status === SaleStatus.CANCELLED) && (
+                {data.type === 'sale' && (data.sale.status === SaleStatus.DENIED || data.sale.status === SaleStatus.CANCELLED) && (
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{data.sale.status === SaleStatus.REJECTED ? 'MOTIVO DA REJEIÇÃO' : 'MOTIVO DO CANCELAMENTO'}</Text>
-                        <Text style={styles.value}>{data.sale.status === SaleStatus.REJECTED ? data.sale.rejectionReason : data.sale.cancellationReason} {/* Assuming rejectionReason for sales */}</Text>
+                        <Text style={styles.sectionTitle}>{data.sale.status === SaleStatus.DENIED ? 'MOTIVO DA REJEIÇÃO' : 'MOTIVO DO CANCELAMENTO'}</Text>
+                        <Text style={styles.value}>{data.sale.status === SaleStatus.DENIED ? data.sale.denialReason : data.sale.cancellationReason} {/* Assuming rejectionReason for sales */}</Text>
                     </View>
                 )}
 

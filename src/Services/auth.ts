@@ -70,6 +70,7 @@ export interface DashboardData {
     totalSales: number;
     activeMaterials: number;
     lastPurchase: string;
+    lastSale: string;
 }
 
 // Auth service

@@ -44,7 +44,8 @@ export const AccountPage = () => {
         totalSpent: 0,
         totalSales: 0,
         activeMaterials: 0,
-        lastPurchase: ''
+        lastPurchase: '',
+        lastSale: ''
     });
     const { enqueueSnackbar } = useSnackbar();
 

@@ -28,7 +28,7 @@ export interface Sale {
     paymentDate?: string | null; // Assuming nullable Date comes as string or null
     notes?: string | null;
     establishedPricePerKg?: number; // Assuming this field exists on backend Sale entity
-    rejectionReason?: string | null; // Assuming this field exists on backend Sale entity
+    denialReason?: string | null; // Assuming this field exists on backend Sale entity
     cancellationReason?: string | null; // Assuming this field exists on backend Sale entity
     createdAt: string;
     updatedAt: string;

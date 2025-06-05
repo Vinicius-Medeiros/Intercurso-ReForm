@@ -1,4 +1,4 @@
-import { Delete, Edit, MoreVert, Search, Visibility, Warning } from '@mui/icons-material';
+import { Delete, Edit, Info, MoreVert, Search, Visibility, Warning } from '@mui/icons-material';
 import {
     Box,
     FormControl,
@@ -165,7 +165,7 @@ export const SalesPage = () => {
 
         let title = '';
         let description = '';
-        let onConfirm: () => void = () => {};
+        let onConfirm: () => void = () => { };
         let color = '';
 
         switch (action) {
@@ -287,8 +287,8 @@ export const SalesPage = () => {
         <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h4" component="h1">
-                Vendas
-            </Typography>
+                    Vendas
+                </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
@@ -447,7 +447,7 @@ export const SalesPage = () => {
                                             )}
                                         </Box>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ display: 'flex', alignItems: 'center', fontWeight: 'regular' }}>
                                         <Box
                                             sx={{
                                                 display: 'inline-block',
@@ -461,6 +461,13 @@ export const SalesPage = () => {
                                             }}
                                         >
                                             {getStatusLabel(sale.status)}
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', fontWeight: 'regular' }}>
+                                            {(sale.denialReason != null || sale.cancellationReason != null) && (
+                                                <Tooltip title={sale.denialReason != null ? sale.denialReason : sale.cancellationReason}>
+                                                    <Info sx={{ color: '#228BE6' }} />
+                                                </Tooltip>
+                                            )}
                                         </Box>
                                     </TableCell>
                                     <TableCell>
@@ -583,7 +590,7 @@ export const SalesPage = () => {
             <ConfirmModal
                 open={confirmModal?.open || false}
                 onClose={() => setConfirmModal(null)}
-                onConfirm={confirmModal?.onConfirm || (() => {})}
+                onConfirm={confirmModal?.onConfirm || (() => { })}
                 title={confirmModal?.title || ''}
                 message={confirmModal?.description || ''}
                 confirmText="Confirmar"

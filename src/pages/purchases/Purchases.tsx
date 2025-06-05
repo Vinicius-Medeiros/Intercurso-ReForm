@@ -1,4 +1,4 @@
-import { Delete, Edit, MoreVert, Search, Visibility, Warning } from '@mui/icons-material';
+import { Delete, Edit, Info, MoreVert, Search, Visibility, Warning } from '@mui/icons-material';
 import {
     Box,
     FormControl,
@@ -60,6 +60,7 @@ export const PurchasesPage = () => {
             setIsLoading(true);
             setError(null);
             const data = await purchaseService.getCompanyPurchases('buyer');
+            console.log(data);
             setPurchases(data);
         } catch (error) {
             console.error("Failed to fetch purchases:", error);
@@ -400,7 +401,7 @@ export const PurchasesPage = () => {
                                             )}
                                         </Box>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ display: 'flex', alignItems: 'center', fontWeight: 'regular' }}>
                                         <Box
                                             sx={{
                                                 display: 'inline-block',
@@ -414,6 +415,13 @@ export const PurchasesPage = () => {
                                             }}
                                         >
                                             {getStatusLabel(purchase.status)}
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', fontWeight: 'regular' }}>
+                                            {(purchase.denialReason != null || purchase.cancellationReason != null) && (
+                                                <Tooltip title={purchase.denialReason != null ? purchase.denialReason : purchase.cancellationReason}>
+                                                    <Info sx={{ color: '#228BE6' }} />
+                                                </Tooltip>
+                                            )}
                                         </Box>
                                     </TableCell>
                                     <TableCell>

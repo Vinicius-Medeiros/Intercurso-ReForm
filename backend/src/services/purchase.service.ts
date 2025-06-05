@@ -2,12 +2,14 @@ import { AppDataSource } from "../config/data-source";
 import { Company } from "../entities/Company";
 import { Material } from "../entities/Material";
 import { Purchase, PurchaseStatus } from "../entities/Purchase";
+import { Sale, SaleStatus } from "../entities/Sale";
 import { AppError } from "../errors/AppError";
 
 export class PurchaseService {
     private purchaseRepository = AppDataSource.getRepository(Purchase);
     private companyRepository = AppDataSource.getRepository(Company);
     private materialRepository = AppDataSource.getRepository(Material);
+    private saleRepository = AppDataSource.getRepository(Sale);
 
     async createPurchase(
         buyerId: string,
@@ -71,10 +73,39 @@ export class PurchaseService {
         return this.purchaseRepository.save(purchase);
     }
 
+    private async createOrUpdateSale(purchase: Purchase, status: SaleStatus, reason: string | null = null): Promise<void> {
+        let sale = await this.saleRepository.findOne({
+            where: { purchaseId: purchase.id }
+        });
+
+        if (!sale) {
+            sale = this.saleRepository.create({
+                purchaseId: purchase.id,
+                purchase: purchase,
+                contractNumber: `SALE-${purchase.id.substring(0, 8)}`,
+                quantity: purchase.quantity,
+                unitPrice: purchase.unitPrice,
+                totalValue: purchase.totalValue,
+                seller: purchase.seller,
+                material: purchase.material,
+                saleDate: purchase.createdAt,
+                status: status,
+                reason: reason,
+                statusChangeDate: new Date()
+            });
+        } else {
+            sale.status = status;
+            sale.reason = reason;
+            sale.statusChangeDate = new Date();
+        }
+
+        await this.saleRepository.save(sale);
+    }
+
     async denyPurchase(purchaseId: string, sellerId: string, reason: string): Promise<Purchase> {
         const purchase = await this.purchaseRepository.findOne({
             where: { id: purchaseId },
-            relations: ['seller']
+            relations: ['seller', 'material']
         });
 
         if (!purchase) {
@@ -91,13 +122,18 @@ export class PurchaseService {
 
         purchase.status = PurchaseStatus.DENIED;
         purchase.denialReason = reason;
-        return this.purchaseRepository.save(purchase);
+        const updatedPurchase = await this.purchaseRepository.save(purchase);
+        
+        // Create/update sale record
+        await this.createOrUpdateSale(updatedPurchase, SaleStatus.DENIED, reason);
+        
+        return updatedPurchase;
     }
 
     async cancelPurchase(purchaseId: string, userId: string, reason: string): Promise<Purchase> {
         const purchase = await this.purchaseRepository.findOne({
             where: { id: purchaseId },
-            relations: ['seller']
+            relations: ['seller', 'material']
         });
 
         if (!purchase) {
@@ -110,7 +146,12 @@ export class PurchaseService {
 
         purchase.status = PurchaseStatus.CANCELLED;
         purchase.cancellationReason = reason;
-        return this.purchaseRepository.save(purchase);
+        const updatedPurchase = await this.purchaseRepository.save(purchase);
+        
+        // Create/update sale record
+        await this.createOrUpdateSale(updatedPurchase, SaleStatus.CANCELLED, reason);
+        
+        return updatedPurchase;
     }
 
     async completePurchase(purchaseId: string, sellerId: string): Promise<Purchase> {
@@ -139,7 +180,12 @@ export class PurchaseService {
         }
 
         purchase.status = PurchaseStatus.COMPLETED;
-        return this.purchaseRepository.save(purchase);
+        const updatedPurchase = await this.purchaseRepository.save(purchase);
+        
+        // Create/update sale record
+        await this.createOrUpdateSale(updatedPurchase, SaleStatus.COMPLETED);
+        
+        return updatedPurchase;
     }
 
     async getCompanyPurchases(companyId: string, type: 'buyer' | 'seller'): Promise<Purchase[]> {

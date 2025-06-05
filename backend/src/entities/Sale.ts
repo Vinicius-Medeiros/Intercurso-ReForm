@@ -1,11 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 import { Company } from "./Company";
 import { Material } from "./Material";
+import { Purchase } from "./Purchase";
 
 export enum SaleStatus {
     PENDING = "pending",
     APPROVED = "approved",
-    REJECTED = "rejected",
+    DENIED = "denied",
     COMPLETED = "completed",
     CANCELLED = "cancelled"
 }
@@ -53,6 +54,19 @@ export class Sale {
     @ManyToOne(() => Material, (material: Material) => material.sales)
     @JoinColumn({ name: "material_id" })
     material: Material;
+
+    @Column({ nullable: true })
+    purchaseId: string;
+
+    @ManyToOne(() => Purchase, { nullable: true })
+    @JoinColumn({ name: "purchase_id" })
+    purchase: Purchase;
+
+    @Column({ type: "text", nullable: true })
+    reason: string | null;
+
+    @Column({ type: "date", nullable: true })
+    statusChangeDate: Date;
 
     @CreateDateColumn()
     createdAt: Date;

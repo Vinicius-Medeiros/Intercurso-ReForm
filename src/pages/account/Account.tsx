@@ -43,6 +43,7 @@ export const AccountPage = () => {
         totalPurchases: 0,
         totalSpent: 0,
         totalSales: 0,
+        totalSalesValue: 0,
         activeMaterials: 0,
         lastPurchase: '',
         lastSale: ''

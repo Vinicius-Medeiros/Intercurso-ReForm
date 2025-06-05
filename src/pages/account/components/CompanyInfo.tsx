@@ -124,7 +124,7 @@ export const CompanyInfo = ({ companyInfo, onEdit }: CompanyInfoProps) => {
                     <TextField
                         fullWidth
                         label="Telefone"
-                        value={isEditMode ? editedInfo.phone : formatPhoneNumber(companyInfo.phone)}
+                        value={isEditMode ? editedInfo.phone : companyInfo.phone.length > 11 ? companyInfo.phone : formatPhoneNumber(companyInfo.phone)}
                         onChange={handleChange('phone')}
                         disabled={!isEditMode}
                         InputProps={{

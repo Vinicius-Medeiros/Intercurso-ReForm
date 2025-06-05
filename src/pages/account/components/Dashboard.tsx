@@ -18,8 +18,10 @@ interface DashboardData {
     totalPurchases: number;
     totalSpent: number;
     totalSales: number;
+    totalSalesValue: number;
     activeMaterials: number;
     lastPurchase: string;
+    lastSale: string;
 }
 
 interface DashboardProps {
@@ -27,6 +29,61 @@ interface DashboardProps {
 }
 
 export const Dashboard = ({ data }: DashboardProps) => {
+    const hasPurchase = data.lastPurchase !== '';
+    const hasSale = data.lastSale !== '';
+
+    const renderLastTransaction = () => {
+        if (!hasPurchase && !hasSale) {
+            return (
+                <>
+                    <Typography variant="subtitle1" color="text.secondary">
+                        Nenhuma transação realizada
+                    </Typography>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                        -
+                    </Typography>
+                </>
+            );
+        }
+
+        if (hasPurchase && !hasSale) {
+            return (
+                <>
+                    <Typography variant="subtitle1" color="text.secondary">
+                        Última Compra
+                    </Typography>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                        {data.lastPurchase}
+                    </Typography>
+                </>
+            );
+        }
+
+        if (!hasPurchase && hasSale) {
+            return (
+                <>
+                    <Typography variant="subtitle1" color="text.secondary">
+                        Última Venda
+                    </Typography>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                        {data.lastSale}
+                    </Typography>
+                </>
+            );
+        }
+
+        return (
+            <>
+                <Typography variant="subtitle1" color="text.secondary">
+                    Última Compra / Última Venda
+                </Typography>
+                <Typography sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                    {data.lastPurchase} / {data.lastSale}
+                </Typography>
+            </>
+        );
+    };
+
     return (
         <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -41,7 +98,7 @@ export const Dashboard = ({ data }: DashboardProps) => {
                                 <ShoppingCart color="secondary" />
                                 <Typography variant="h6">Compras</Typography>
                             </Box>
-                            <Typography variant="h6" color="secondary">
+                            <Typography sx={{ fontSize: '1rem', fontWeight: 500 }} color="secondary">
                                 {data.totalPurchases}
                                 {' '}/{' '}
                                 {data.totalSpent.toLocaleString('pt-BR', {
@@ -62,14 +119,16 @@ export const Dashboard = ({ data }: DashboardProps) => {
                                 <AttachMoney color="success" />
                                 <Typography variant="h6">Vendas</Typography>
                             </Box>
-                            <Typography variant="h6" color="success.main">
-                                {data.totalSales.toLocaleString('pt-BR', {
+                            <Typography sx={{ fontSize: '1rem', fontWeight: 500 }} color="success.main">
+                                {data.totalSales}
+                                {' '}/{' '}
+                                {data.totalSalesValue.toLocaleString('pt-BR', {
                                     style: 'currency',
                                     currency: 'BRL'
                                 })}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Total em vendas realizadas
+                                Total de vendas realizadas / Total recebido
                             </Typography>
                         </CardContent>
                     </Card>
@@ -81,7 +140,7 @@ export const Dashboard = ({ data }: DashboardProps) => {
                                 <Description color="secondary" />
                                 <Typography variant="h6">Materiais</Typography>
                             </Box>
-                            <Typography variant="h6" color="secondary">
+                            <Typography sx={{ fontSize: '1rem', fontWeight: 500 }} color="secondary">
                                 {data.activeMaterials}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -93,12 +152,11 @@ export const Dashboard = ({ data }: DashboardProps) => {
                 <Grid item xs={12}>
                     <Card>
                         <CardContent>
-                            <Typography variant="subtitle1" color="text.secondary">
-                                Última Compra
-                            </Typography>
-                            <Typography variant="h6">
-                                {data.lastPurchase}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Description color="secondary" />
+                                <Typography variant="h6">Últimas Transações</Typography>
+                            </Box>
+                            {renderLastTransaction()}
                         </CardContent>
                     </Card>
                 </Grid>

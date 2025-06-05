@@ -6,7 +6,7 @@ import { Company } from "../entities/Company"; // Import Company entity
 import { AppDataSource } from "../config/data-source"; // Import AppDataSource
 import { Purchase, PurchaseStatus } from "../entities/Purchase";
 import { Material } from "../entities/Material";
-import { Sale } from "../entities/Sale";
+import { Sale, SaleStatus } from "../entities/Sale";
 
 dotenv.config();
 
@@ -17,8 +17,10 @@ interface DashboardData {
     totalPurchases: number;
     totalSpent: number;
     totalSales: number;
+    totalSalesValue: number;
     activeMaterials: number;
     lastPurchase: string;
+    lastSale: string;
 }
 
 export class AuthService {
@@ -70,12 +72,13 @@ export class AuthService {
 
         // Get sales where this company is the seller
         const sales = await this.saleRepository.find({
-            where: { seller: { id: companyId } },
+            where: { seller: { id: companyId }, status: SaleStatus.COMPLETED },
             // Include material relation if needed for totalSales calculation (it is not currently needed)
             // relations: ['material']
         });
 
-        const totalSales = sales.reduce((sum, sale) => sum + Number(sale.totalValue), 0);
+        const totalSales = sales.length;
+        const totalSalesValue = sales.reduce((sum, sale) => sum + Number(sale.totalValue), 0);
 
         // Get active materials count (assuming Material entity still has a 'company' relation)
         const activeMaterials = await this.materialRepository.count({
@@ -90,12 +93,19 @@ export class AuthService {
             ? purchasedItems.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0].createdAt.toLocaleDateString('pt-BR')
             : '';
 
+        // Get last sale date (from sales)
+        const lastSale = sales.length > 0
+            ? new Date(sales.sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime())[0].saleDate).toLocaleDateString('pt-BR')
+            : '';
+
         return {
             totalPurchases,
             totalSpent,
             totalSales,
+            totalSalesValue,
             activeMaterials,
-            lastPurchase
+            lastPurchase,
+            lastSale
         };
     }
 

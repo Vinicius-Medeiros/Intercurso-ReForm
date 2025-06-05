@@ -194,9 +194,11 @@ export const generateContractPDF = async (data: ContractPDFData) => {
                             <Text style={styles.label}>Preço Final ({obj.material.unit}):</Text>
                             <Text style={styles.value}>{(Number(obj.totalValue) / obj.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {obj.material.unit}</Text>
                         </View>
-                        <View style={{ width: '100%', textAlign: 'center', marginTop: 5 }}>
-                            <Text style={styles.centeredBoldText}>Foi acordado que esse {isDescount ? 'desconto' : 'valorização'} no valor seria aceito.</Text>
-                        </View>
+                        {(obj.status === SaleStatus.COMPLETED || obj.status === PurchaseStatus.COMPLETED) && (
+                            <View style={{ width: '100%', textAlign: 'center', marginTop: 5 }}>
+                                <Text style={styles.centeredBoldText}>Foi acordado que esse {isDescount ? 'desconto' : 'valorização'} no valor seria aceito.</Text>
+                            </View>
+                        )}
                     </>
                 )}
             </>

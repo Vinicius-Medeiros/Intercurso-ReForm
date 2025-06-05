@@ -68,6 +68,7 @@ export interface DashboardData {
     totalPurchases: number;
     totalSpent: number;
     totalSales: number;
+    totalSalesValue: number;
     activeMaterials: number;
     lastPurchase: string;
     lastSale: string;

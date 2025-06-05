@@ -1,14 +1,14 @@
 import axios from 'axios';
 import { Environment } from '../environment';
-import { Material } from './materialService'; // Import Material if Sale entity relates to it
 import { Company } from './auth'; // Import Company if Sale entity relates to it
+import { Material } from './materialService'; // Import Material if Sale entity relates to it
 
 const API_URL = Environment.SERVICE_URL || 'http://localhost:3001/api';
 
 export enum SaleStatus {
     PENDING = "pending",
     APPROVED = "approved",
-    REJECTED = "rejected",
+    DENIED = "denied",
     COMPLETED = "completed",
     CANCELLED = "cancelled"
 }
@@ -80,4 +80,4 @@ const saleService = {
     // Add other sale related methods as needed
 };
 
-export { saleService }; 
+export { saleService };

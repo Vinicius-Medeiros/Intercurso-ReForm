@@ -1,12 +1,12 @@
-import { Box, Dialog, DialogTitle, IconButton, Typography, DialogActions, Button } from '@mui/material';
 import { Close } from '@mui/icons-material';
+import { Box, Button, Dialog, DialogActions, DialogTitle, IconButton, Typography } from '@mui/material';
 import { Purchase } from '../../Services/purchaseService';
 
 interface CancelPurchaseModalProps {
     open: boolean;
     onClose: () => void;
     purchase: Purchase;
-    onConfirm: (id: string) => void;
+    onConfirm: () => void;
 }
 
 export const CancelPurchaseModal = ({ open, onClose, purchase, onConfirm }: CancelPurchaseModalProps) => {
@@ -19,7 +19,7 @@ export const CancelPurchaseModal = ({ open, onClose, purchase, onConfirm }: Canc
             PaperProps={{
                 sx: {
                     bgcolor: 'background.paper',
-                    maxHeight: '30vh',
+                    maxHeight: '40vh',
                 }
             }}
         >
@@ -56,8 +56,9 @@ export const CancelPurchaseModal = ({ open, onClose, purchase, onConfirm }: Canc
                     </Typography>
                     {' '}da empresa{' '}
                     <Typography component="span" fontWeight="bold" display="inline">
-                        {purchase.seller.name}?
+                        {purchase.seller.name}
                     </Typography>
+                    ?
                 </Typography>
             </Box>
             <DialogActions sx={{ p: 2, gap: 1 }}>
@@ -69,7 +70,7 @@ export const CancelPurchaseModal = ({ open, onClose, purchase, onConfirm }: Canc
                     Voltar
                 </Button>
                 <Button
-                    onClick={() => onConfirm(purchase.id)}
+                    onClick={onConfirm}
                     variant="contained"
                     color="error"
                 >

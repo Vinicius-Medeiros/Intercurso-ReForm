@@ -44,6 +44,7 @@ export interface CreatePurchaseRequest {
     materialId: string;
     quantity: number;
     unitPrice: number;
+    totalValue: number;
 }
 
 export interface UpdatePurchaseRequest {
@@ -75,7 +76,10 @@ const purchaseService = {
     },
 
     async cancelPurchase(purchaseId: string, reason?: string): Promise<Purchase> {
-        const response = await axios.post(`${API_URL}/purchases/${purchaseId}/cancel`, { reason });
+        const response = await axios.post(`${API_URL}/purchases/${purchaseId}/cancel`, {
+            status: PurchaseStatus.CANCELLED,
+            reason
+        });
         return response.data;
     },
 
@@ -90,4 +94,5 @@ const purchaseService = {
     }
 };
 
-export { purchaseService }; 
+export { purchaseService };
+

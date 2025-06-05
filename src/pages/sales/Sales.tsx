@@ -17,19 +17,19 @@ import {
     TablePagination,
     TableRow,
     TextField,
-    Typography,
-    Tooltip
+    Tooltip,
+    Typography
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { ptBR } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
-import { ConfirmModal } from '../../components/modals/ConfirmModal';
-import { openContractInNewTab } from '../../components/contracts/ContractViewer';
-import { saleService, Sale, SaleStatus } from '../../Services/saleService';
 import { useSnackbar } from 'notistack';
+import { useEffect, useState } from 'react';
+import { openContractInNewTab } from '../../components/contracts/ContractViewer';
+import { ConfirmModal } from '../../components/modals/ConfirmModal';
 import { ReasonInputModal } from '../../components/modals/ReasonInputModal';
+import { Sale, saleService, SaleStatus } from '../../Services/saleService';
 
 export const SalesPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -50,13 +50,9 @@ export const SalesPage = () => {
         onConfirm: () => void;
         color?: string;
     } | null>(null);
-    const [reasonModal, setReasonModal] = useState<{
-        open: boolean;
-        title: string;
-        description?: string;
-        onConfirm: (reason: string) => void;
-        initialReason?: string;
-    } | null>(null);
+    const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
+    const [pendingDenyId, setPendingDenyId] = useState<string | null>(null);
+    const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
     const { enqueueSnackbar } = useSnackbar();
 
     const fetchSales = async () => {
@@ -112,7 +108,7 @@ export const SalesPage = () => {
                 return '#66BB6A';
             case SaleStatus.COMPLETED:
                 return '#42A5F5';
-            case SaleStatus.REJECTED:
+            case SaleStatus.DENIED:
                 return '#EF5350';
             case SaleStatus.CANCELLED:
                 return '#757575';
@@ -129,7 +125,7 @@ export const SalesPage = () => {
                 return 'APROVADA'; // Verde
             case SaleStatus.COMPLETED:
                 return 'CONCLUÍDA'; // Azul
-            case SaleStatus.REJECTED:
+            case SaleStatus.DENIED:
                 return 'NEGADA'; // Vermelho
             case SaleStatus.CANCELLED:
                 return 'CANCELADA'; // Cinza
@@ -162,18 +158,18 @@ export const SalesPage = () => {
         setSelectedSaleId(null);
     };
 
-    const handleAction = (action: 'approve' | 'deny' | 'cancel' | 'complete', saleId: string) => {
+    const handleAction = (action: SaleStatus, saleId: string) => {
         handleMenuClose();
         const sale = sales.find(s => s.id === saleId);
         if (!sale) return;
 
         let title = '';
         let description = '';
-        let onConfirm = () => {};
-        let color = undefined;
+        let onConfirm: () => void = () => {};
+        let color = '';
 
         switch (action) {
-            case 'approve':
+            case SaleStatus.APPROVED:
                 title = 'Confirmar Aprovação';
                 description = `Tem certeza que deseja aprovar a proposta de venda de ${sale.material.name} para ${sale.buyer.name}?`;
                 onConfirm = async () => {
@@ -189,39 +185,27 @@ export const SalesPage = () => {
                 };
                 color = '#66BB6A';
                 break;
-            case 'deny':
+            case SaleStatus.DENIED:
                 title = 'Confirmar Negação';
                 description = `Tem certeza que deseja negar a proposta de venda de ${sale.material.name} para ${sale.buyer.name}?`;
-                onConfirm = async () => {
-                    try {
-                        await saleService.rejectSale(saleId);
-                        enqueueSnackbar('Proposta negada com sucesso!', { variant: 'success' });
-                        fetchSales();
-                    } catch (error) {
-                        console.error("Failed to deny sale:", error);
-                        enqueueSnackbar('Erro ao negar proposta.', { variant: 'error' });
-                    }
+                onConfirm = () => {
                     setConfirmModal(null);
+                    setPendingDenyId(saleId);
+                    setIsReasonModalOpen(true);
                 };
                 color = '#EF5350';
                 break;
-            case 'cancel':
+            case SaleStatus.CANCELLED:
                 title = 'Confirmar Cancelamento';
                 description = `Tem certeza que deseja cancelar a proposta de venda de ${sale.material.name} para ${sale.buyer.name}?`;
-                onConfirm = async () => {
-                    try {
-                        await saleService.cancelSale(saleId);
-                        enqueueSnackbar('Proposta cancelada com sucesso!', { variant: 'success' });
-                        fetchSales();
-                    } catch (error) {
-                        console.error("Failed to cancel sale:", error);
-                        enqueueSnackbar('Erro ao cancelar proposta.', { variant: 'error' });
-                    }
+                onConfirm = () => {
                     setConfirmModal(null);
+                    setPendingCancelId(saleId);
+                    setIsReasonModalOpen(true);
                 };
                 color = '#757575';
                 break;
-            case 'complete':
+            case SaleStatus.COMPLETED:
                 title = 'Confirmar Conclusão';
                 description = `Tem certeza que deseja marcar como concluída a proposta de venda de ${sale.material.name} para ${sale.buyer.name}? Esta ação não pode ser desfeita.`;
                 onConfirm = async () => {
@@ -256,14 +240,14 @@ export const SalesPage = () => {
         });
     };
 
-    const isActionDisabled = (status: SaleStatus, action: 'approve' | 'deny' | 'cancel' | 'complete') => {
+    const isActionDisabled = (status: SaleStatus, action: SaleStatus) => {
         switch (action) {
-            case 'approve':
-            case 'deny':
+            case SaleStatus.APPROVED:
+            case SaleStatus.DENIED:
                 return status !== SaleStatus.PENDING;
-            case 'cancel':
+            case SaleStatus.CANCELLED:
                 return status !== SaleStatus.APPROVED && status !== SaleStatus.PENDING;
-            case 'complete':
+            case SaleStatus.COMPLETED:
                 return status !== SaleStatus.APPROVED;
             default:
                 return true;
@@ -271,10 +255,32 @@ export const SalesPage = () => {
     };
 
     const isPriceDifferent = (sale: Sale) => {
-        if (sale.quantity > 0 && sale.unitPrice !== undefined) {
-            return sale.totalValue != sale.quantity * sale.unitPrice;
+        return Number(sale.totalValue) != Number((sale.quantity * sale.unitPrice).toFixed(2));
+    };
+
+    const handleReasonConfirm = async (reason: string) => {
+        if (pendingDenyId) {
+            try {
+                await saleService.rejectSale(pendingDenyId, reason);
+                enqueueSnackbar('Proposta negada com sucesso!', { variant: 'success' });
+                fetchSales();
+            } catch (error) {
+                console.error("Failed to deny sale:", error);
+                enqueueSnackbar('Erro ao negar proposta.', { variant: 'error' });
+            }
+            setPendingDenyId(null);
+        } else if (pendingCancelId) {
+            try {
+                await saleService.cancelSale(pendingCancelId, reason);
+                enqueueSnackbar('Proposta cancelada com sucesso!', { variant: 'success' });
+                fetchSales();
+            } catch (error) {
+                console.error("Failed to cancel sale:", error);
+                enqueueSnackbar('Erro ao cancelar proposta.', { variant: 'error' });
+            }
+            setPendingCancelId(null);
         }
-        return false;
+        setIsReasonModalOpen(false);
     };
 
     return (
@@ -318,7 +324,7 @@ export const SalesPage = () => {
                         <MenuItem value={SaleStatus.PENDING}>Pendente</MenuItem>
                         <MenuItem value={SaleStatus.APPROVED}>Aprovado</MenuItem>
                         <MenuItem value={SaleStatus.COMPLETED}>Concluído</MenuItem>
-                        <MenuItem value={SaleStatus.REJECTED}>Negado</MenuItem>
+                        <MenuItem value={SaleStatus.DENIED}>Negado</MenuItem>
                         <MenuItem value={SaleStatus.CANCELLED}>Cancelado</MenuItem>
                     </Select>
                 </FormControl>
@@ -408,7 +414,10 @@ export const SalesPage = () => {
                                         whiteSpace: 'normal',
                                         wordWrap: 'break-word'
                                     }}>
-                                        {sale.buyer.cnpj}
+                                        {sale.buyer.cnpj.replace(
+                                            /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+                                            '$1.$2.$3/$4-$5'
+                                        )}
                                     </TableCell>
                                     <TableCell sx={{
                                         maxWidth: 0,
@@ -513,29 +522,29 @@ export const SalesPage = () => {
                                             })}
                                         >
                                             <MenuItem
-                                                onClick={() => handleAction('approve', sale.id)}
-                                                disabled={isActionDisabled(sale.status, 'approve')}
+                                                onClick={() => handleAction(SaleStatus.APPROVED, sale.id)}
+                                                disabled={isActionDisabled(sale.status, SaleStatus.APPROVED)}
                                             >
                                                 <Edit fontSize="small" sx={{ mr: 1 }} />
                                                 Aprovar
                                             </MenuItem>
                                             <MenuItem
-                                                onClick={() => handleAction('deny', sale.id)}
-                                                disabled={isActionDisabled(sale.status, 'deny')}
+                                                onClick={() => handleAction(SaleStatus.DENIED, sale.id)}
+                                                disabled={isActionDisabled(sale.status, SaleStatus.DENIED)}
                                             >
                                                 <Delete fontSize="small" sx={{ mr: 1 }} />
                                                 Negar
                                             </MenuItem>
                                             <MenuItem
-                                                onClick={() => handleAction('cancel', sale.id)}
-                                                disabled={isActionDisabled(sale.status, 'cancel')}
+                                                onClick={() => handleAction(SaleStatus.CANCELLED, sale.id)}
+                                                disabled={isActionDisabled(sale.status, SaleStatus.CANCELLED)}
                                             >
                                                 <Delete fontSize="small" sx={{ mr: 1 }} />
                                                 Cancelar
                                             </MenuItem>
                                             <MenuItem
-                                                onClick={() => handleAction('complete', sale.id)}
-                                                disabled={isActionDisabled(sale.status, 'complete')}
+                                                onClick={() => handleAction(SaleStatus.COMPLETED, sale.id)}
+                                                disabled={isActionDisabled(sale.status, SaleStatus.COMPLETED)}
                                             >
                                                 <Edit fontSize="small" sx={{ mr: 1 }} />
                                                 Concluir
@@ -580,6 +589,18 @@ export const SalesPage = () => {
                 confirmText="Confirmar"
                 cancelText="Cancelar"
                 color={confirmModal?.color}
+            />
+
+            <ReasonInputModal
+                open={isReasonModalOpen}
+                onClose={() => {
+                    setIsReasonModalOpen(false);
+                    setPendingDenyId(null);
+                    setPendingCancelId(null);
+                }}
+                title={pendingDenyId ? "Motivo da Negação" : "Motivo do Cancelamento"}
+                description={pendingDenyId ? "Por favor, informe o motivo da negação da proposta." : "Por favor, informe o motivo do cancelamento da proposta."}
+                onConfirm={handleReasonConfirm}
             />
         </Box>
     );

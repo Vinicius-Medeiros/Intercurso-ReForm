@@ -1,8 +1,8 @@
 import { AppDataSource } from "../config/data-source";
-import { Purchase, PurchaseStatus } from "../entities/Purchase";
-import { AppError } from "../errors/AppError";
 import { Company } from "../entities/Company";
 import { Material } from "../entities/Material";
+import { Purchase, PurchaseStatus } from "../entities/Purchase";
+import { AppError } from "../errors/AppError";
 
 export class PurchaseService {
     private purchaseRepository = AppDataSource.getRepository(Purchase);
@@ -14,7 +14,8 @@ export class PurchaseService {
         sellerId: string,
         materialId: string,
         quantity: number,
-        unitPrice: number
+        unitPrice: number,
+        totalValue: number
     ): Promise<Purchase> {
         // Validate material exists and belongs to seller
         const material = await this.materialRepository.findOne({
@@ -41,7 +42,7 @@ export class PurchaseService {
             material: { id: materialId },
             quantity,
             unitPrice,
-            totalValue: quantity,
+            totalValue: totalValue,
             status: PurchaseStatus.PENDING
         });
 
@@ -93,29 +94,18 @@ export class PurchaseService {
         return this.purchaseRepository.save(purchase);
     }
 
-    async cancelPurchase(purchaseId: string, sellerId: string, reason: string): Promise<Purchase> {
+    async cancelPurchase(purchaseId: string, userId: string, reason: string): Promise<Purchase> {
         const purchase = await this.purchaseRepository.findOne({
             where: { id: purchaseId },
-            relations: ['seller', 'material']
+            relations: ['seller']
         });
 
         if (!purchase) {
             throw new AppError("Purchase not found", 404);
         }
 
-        if (purchase.seller.id !== sellerId) {
+        if (purchase.seller.id !== userId && purchase.buyer.id !== userId) {
             throw new AppError("Not authorized to cancel this purchase", 403);
-        }
-
-        if (purchase.status !== PurchaseStatus.APPROVED) {
-            throw new AppError("Purchase must be approved to be cancelled", 400);
-        }
-
-        // Update material quantity
-        const material = await this.materialRepository.findOneBy({ id: purchase.material.id });
-        if (material) {
-            material.quantity += purchase.quantity;
-            await this.materialRepository.save(material);
         }
 
         purchase.status = PurchaseStatus.CANCELLED;

@@ -1,9 +1,9 @@
 import { AccountCircle } from "@mui/icons-material";
 import { AppBar, Box, IconButton, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
 import { useState } from "react";
-import Logo from "../../assets/logo";
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from 'react-redux';
+import Logo from "../../assets/logo";
 import { RootState } from '../../store';
 import { logout } from '../../store/slices/authSlice';
 
@@ -55,7 +55,7 @@ export const Header = () => {
                 >
                 </Box>
                     
-                    <div>
+                    <div style={{ position: 'relative' }}>
                         <IconButton
                             size="large"
                             aria-label="account of current user"
@@ -68,7 +68,7 @@ export const Header = () => {
                                 <AccountCircle
                                     sx={{
                                         height: 48,
-                                        width: 48
+                                        width: 48,
                                     }}
                                 />
                                 :
@@ -94,8 +94,8 @@ export const Header = () => {
                             }}
                             sx={(theme) => ({
                                 "& .MuiPaper-root": {
-                                    top: "65px !important",
-                                    left: "1795px !important",
+                                    marginTop: "65px",
+                                    marginLeft: "21px",
                                     overflow: 'visible',
                                     "&::before, &::after": {
                                         content: '""',

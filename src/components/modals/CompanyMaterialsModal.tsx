@@ -1,5 +1,12 @@
-import { Close, AttachMoney } from '@mui/icons-material';
-import { 
+import { AttachMoney, Close } from '@mui/icons-material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    CircularProgress,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -11,22 +18,15 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Typography,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
     TextField,
-    Button,
-    Box,
     Tooltip,
-    styled,
-    CircularProgress
+    Typography,
+    styled
 } from '@mui/material';
-import { Material } from '../../Services/materialService';
-import { useState } from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { purchaseService } from '../../Services/purchaseService';
 import { useSnackbar } from 'notistack';
+import { useState } from 'react';
+import { Material } from '../../Services/materialService';
+import { purchaseService } from '../../Services/purchaseService';
 
 interface CompanyMaterialsModalProps {
     open: boolean;
@@ -94,7 +94,8 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, companyId, m
                 sellerId: companyId,
                 materialId: selectedMaterial.id,
                 quantity: Number(quantity),
-                unitPrice: Number(selectedMaterial.price)
+                unitPrice: Number(selectedMaterial.price),
+                totalValue: Number(totalValue)
             });
 
             enqueueSnackbar("Proposta de compra enviada com sucesso!", { variant: "success" });
@@ -179,7 +180,7 @@ export const CompanyMaterialsModal = ({ open, onClose, companyName, companyId, m
                 <TableContainer
                     component={Paper} 
                     sx={(theme) => ({ 
-                        maxHeight: 'calc(80vh - 480px)',
+                        maxHeight: 'calc(100vh - 480px)',
                         scrollbarColor: `${theme.palette.secondary.light} transparent`,
                         scrollbarWidth: 'thin',
                         '&::-webkit-scrollbar': {

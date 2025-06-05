@@ -1,7 +1,7 @@
 export enum ContractState {
-    PENDING = "PENDENTE",
-    ACCEPTED = "APROVADO",
-    REJECTED = "NEGADO",
-    CANCELLED = "CANCELADO",
-    COMPLETED = "CONCLUIDO",
+    PENDING = "pending",
+    ACCEPTED = "approved",
+    REJECTED = "denied",
+    CANCELLED = "cancelled",
+    COMPLETED = "completed",
 }

@@ -24,12 +24,13 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { ptBR } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
-import { EditPurchaseModal } from '../../components/modals/EditPurchaseModal';
-import { CancelPurchaseModal } from '../../components/modals/CancelPurchaseModal';
-import { openContractInNewTab } from '../../components/contracts/ContractViewer';
-import { purchaseService, Purchase, PurchaseStatus } from '../../Services/purchaseService';
 import { useSnackbar } from 'notistack';
+import { useEffect, useState } from 'react';
+import { openContractInNewTab } from '../../components/contracts/ContractViewer';
+import { CancelPurchaseModal } from '../../components/modals/CancelPurchaseModal';
+import { EditPurchaseModal } from '../../components/modals/EditPurchaseModal';
+import { ReasonInputModal } from '../../components/modals/ReasonInputModal';
+import { Purchase, purchaseService, PurchaseStatus } from '../../Services/purchaseService';
 
 export const PurchasesPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +45,8 @@ export const PurchasesPage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [purchaseToCancel, setPurchaseToCancel] = useState<Purchase | null>(null);
+    const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
+    const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -203,12 +206,25 @@ export const PurchasesPage = () => {
         }
     };
 
-    const handleConfirmCancel = async (id: string) => {
+    const handleConfirmCancelModal = (id: string) => {
+        setIsCancelModalOpen(false);
+        setPendingCancelId(id);
+        setIsReasonModalOpen(true);
+    };
+
+    const handleReasonConfirm = async (reason: string) => {
+        if (pendingCancelId) {
+            await handleConfirmCancel(pendingCancelId, reason);
+            setPendingCancelId(null);
+        }
+        setIsReasonModalOpen(false);
+        setPurchaseToCancel(null);
+    };
+
+    const handleConfirmCancel = async (id: string, reason: string) => {
         try {
-            // Call the backend API to cancel the purchase
-            await purchaseService.cancelPurchase(id);
+            await purchaseService.cancelPurchase(id, reason);
             enqueueSnackbar('Compra cancelada com sucesso!', { variant: 'success' });
-            // Refetch purchases to update the list
             fetchPurchases();
         } catch (error) {
             console.error("Failed to cancel purchase:", error);
@@ -217,10 +233,7 @@ export const PurchasesPage = () => {
     };
 
     const isPriceDifferent = (purchase: Purchase) => {
-        if (purchase.quantity > 0 && purchase.unitPrice !== undefined) {
-            return purchase.totalValue != purchase.quantity * purchase.unitPrice;
-        }
-        return false;
+        return Number(purchase.totalValue) != Number((purchase.quantity * purchase.unitPrice).toFixed(2));
     };
 
     return (
@@ -526,9 +539,20 @@ export const PurchasesPage = () => {
                         setPurchaseToCancel(null);
                     }}
                     purchase={purchaseToCancel}
-                    onConfirm={handleConfirmCancel}
+                    onConfirm={() => handleConfirmCancelModal(purchaseToCancel.id)}
                 />
             )}
+
+            <ReasonInputModal
+                open={isReasonModalOpen}
+                onClose={() => {
+                    setIsReasonModalOpen(false);
+                    setPendingCancelId(null);
+                }}
+                title="Motivo do Cancelamento"
+                description="Por favor, informe o motivo do cancelamento da compra."
+                onConfirm={handleReasonConfirm}
+            />
         </Box>
     );
 }; 

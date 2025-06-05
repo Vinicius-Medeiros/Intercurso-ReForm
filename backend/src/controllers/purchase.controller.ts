@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
-import { PurchaseService } from "../services/purchase.service";
-import { AppError } from "../errors/AppError";
 import { z } from 'zod';
-import { PurchaseStatus } from "../entities/Purchase";
-import { Purchase } from "../entities/Purchase";
+import { Purchase, PurchaseStatus } from "../entities/Purchase";
+import { AppError } from "../errors/AppError";
+import { PurchaseService } from "../services/purchase.service";
 
 // Define schemas for purchase validation
 const createPurchaseSchema = z.object({
     sellerId: z.string().uuid(),
     materialId: z.string().uuid(),
     quantity: z.number().positive(),
-    unitPrice: z.number().positive()
+    unitPrice: z.number().positive(),
+    totalValue: z.number().positive()
 });
 
 const updatePurchaseSchema = z.object({
@@ -27,7 +27,10 @@ const updatePurchaseSchema = z.object({
 });
 
 const updatePurchaseStatusSchema = z.object({
-    status: z.nativeEnum(PurchaseStatus),
+    reason: z.string().optional()
+});
+
+const denyPurchaseSchema = z.object({
     reason: z.string().optional()
 });
 
@@ -42,14 +45,15 @@ export class PurchaseController {
             throw new AppError("Validation error", 400);
         }
 
-        const { sellerId, materialId, quantity, unitPrice } = validation.data;
+        const { sellerId, materialId, quantity, unitPrice, totalValue } = validation.data;
 
         const purchase = await this.purchaseService.createPurchase(
             buyerId,
             sellerId,
             materialId,
             quantity,
-            unitPrice
+            unitPrice,
+            totalValue
         );
 
         return res.status(201).json(purchase);
@@ -66,7 +70,7 @@ export class PurchaseController {
     async denyPurchase(req: Request, res: Response): Promise<Response> {
         const sellerId = (req as any).user.id;
         const { purchaseId } = req.params;
-        const validation = updatePurchaseStatusSchema.safeParse(req.body);
+        const validation = denyPurchaseSchema.safeParse(req.body);
 
         if (!validation.success) {
             throw new AppError("Validation error", 400);
@@ -79,7 +83,7 @@ export class PurchaseController {
     }
 
     async cancelPurchase(req: Request, res: Response): Promise<Response> {
-        const sellerId = (req as any).user.id;
+        const userId = (req as any).user.id;
         const { purchaseId } = req.params;
         const validation = updatePurchaseStatusSchema.safeParse(req.body);
 
@@ -89,7 +93,7 @@ export class PurchaseController {
 
         const { reason } = validation.data;
 
-        const purchase = await this.purchaseService.cancelPurchase(purchaseId, sellerId, reason || "No reason provided");
+        const purchase = await this.purchaseService.cancelPurchase(purchaseId, userId, reason || "No reason provided");
         return res.json(purchase);
     }
 
